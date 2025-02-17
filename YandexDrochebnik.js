@@ -1,17 +1,5 @@
 const ydt = "[Yandex Drochebink]"
 
-const HEADERS_OBJ = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0",
-    "Accept": "*/*",
-    "Accept-Language": "en-US,en;q=0.5",
-    "Content-Type": "application/json",
-    "X-Correlation-ID": "23bea407-9b41-4c13-b0a0-c66b1f87c26f",
-    "x-csrf-token": "kcAHJdOf-Jn27oyaSixbv3QQ2_LZ_BM7ULDk",
-    "Sec-Fetch-Dest": "empty",
-    "Sec-Fetch-Mode": "cors",
-    "Sec-Fetch-Site": "same-origin"
-}
-
 var await_iter = 0;
 var last = false;
 var lam = 0;
@@ -59,7 +47,7 @@ async function solve(cfg) {
     })
 }
 
-async function solveAll(amount) {
+async function solveAllC(amount) {
     let pobj = parseWindowCfg()
     await_iter = 0
     last = false
@@ -80,7 +68,17 @@ async function solveAll(amount) {
 async function requestApi(pobj, code) {
     return await fetch("https://education.yandex.ru/classroom/api/v2/post-attempts/", {
     "credentials": "include",
-    "headers": HEADERS_OBJ,
+    "headers": {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0",
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "053e5b78-ec7a-4213-8eb7-9e060c22885c",
+        "x-csrf-token": "DK0EIdgv-3cczqtrVTxo41P-XFqTz6aGj3FM",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin"
+    },
     "referrer": `https://education.yandex.ru${pobj.urlpt}`,
     "body": `{\"lpl_id\":${pobj.lpl_id},\"clr_id\":${pobj.clr_id},\"attempt\":{\"answered\":true,\"completed\":true,\"markers\":{\"user_answer\":{\"code\":\"${code.replaceAll("\n", "\\n")}\",\"language\":\"python\"}}},\"sk\":\"kcAHJdOf-Jn27oyaSixbv3QQ2_LZ_BM7ULDk\"}`,
     "method": "POST",
@@ -88,12 +86,46 @@ async function requestApi(pobj, code) {
     });
 }
 
+async function requestLessons(id) {
+    return await fetch(`https://education.yandex.ru/classroom/api/get-course-student-lessons/${id}/?list_type=active&page_size=12`)
+}
+
+async function demolish() {
+    let zv = await requestLessons(getCourse())
+    let pobj = parseWindowCfg()
+    zv.json().then(async (x) => {
+        for (var i = 0; i < x.clessons.length; i++) {
+            let id = x.clessons[i].id
+            let xd = await fetch(`https://education.yandex.ru/classroom/api/get-latest-clesson-result/${id}/`)
+            xd.json().then(async (y) => {
+                let clr = y.id;
+                (await fetch(`https://education.yandex.ru/classroom/api/get-clesson-run/${id}/`)).json().then(async (z) => {
+                    for (var k = 0; k < z.problems.length; k++) {
+                        let lpl = z.problems[k].id
+                        let ggf = {
+                            "clr_id": clr,
+                            "lpl_id": lpl,
+                            "sk": pobj["sk"],
+                            "urlpt": `https://education.yandex.ru/classroom/courses/${getCourse()}/assignments/${id}/run/${k+1}/`
+                        }
+                        solve(ggf)
+                    }
+                });
+            })
+        }
+    })
+}
+
+function getCourse() {
+    return window._data.data.getCourse.id
+}
+
 //window._data.config.sk - sk
 //window._data.data.getLatestCLessonResult.id
 function parseWindowCfg() {
     return {
-        "clr_id": window._data.data.getLatestCLessonResult.id,
-        "lpl_id": window._data.data.getLatestCLessonResult.last_active,
+        "clr_id": window._data.data.getLatestCLessonResult?.id,
+        "lpl_id": window._data.data.getLatestCLessonResult?.last_active,
         "sk": window._data.config.sk,
         "urlpt": window._data.url
     }
@@ -113,22 +145,5 @@ open('file.txt', 'w').write(str(z+1))
 */
 //Данный код решает любой 
 
-//LOADER
-
-return
-
-const lfq = await fetch("https://raw.githubusercontent.com/LeastDepressedDev/randoms/refs/heads/master/YandexDrochebnik.js", {
-    "headers": {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0",
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.5",
-        "X-Correlation-ID": "23bea407-9b41-4c13-b0a0-c66b1f87c26f",
-        "x-csrf-token": "kcAHJdOf-Jn27oyaSixbv3QQ2_LZ_BM7ULDk",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-origin"
-    }
-})
-lfq.text().then((x) => {
-    console.log(x)
-})
+//593479692 593479534
+//158602081 158615971
