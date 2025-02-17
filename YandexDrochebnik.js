@@ -114,7 +114,21 @@ open('file.txt', 'w').write(str(z+1))
 //Данный код решает любой 
 
 //LOADER
-var script = document.createElement("script");
-script.setAttribute("type", "text/javascript");
-script.setAttribute("src", "url to the script file here");
-document.getElementsByTagName("head")[0].appendChild(script);
+
+return
+
+const lfq = await fetch("https://raw.githubusercontent.com/LeastDepressedDev/randoms/refs/heads/master/YandexDrochebnik.js", {
+    "headers": {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0",
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.5",
+        "X-Correlation-ID": "23bea407-9b41-4c13-b0a0-c66b1f87c26f",
+        "x-csrf-token": "kcAHJdOf-Jn27oyaSixbv3QQ2_LZ_BM7ULDk",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin"
+    }
+})
+lfq.text().then((x) => {
+    console.log(x)
+})
