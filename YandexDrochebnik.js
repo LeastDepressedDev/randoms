@@ -1,22 +1,58 @@
+/**
+ *              Instruction:
+ *      1. Загружаем рандомный тест и оптравляем любое решение(не обязательно правильное)
+ *      2. Из поля network копируем все заголовеи
+ *      3. Пастим этот скрипт в console
+ *      4. Теперь у вас есть сила, способная решать примерно 10 задач в секунду
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+
+
+const comSec = `
+####################
+#                  #
+#   Fuck           #
+#      The         #
+#        Yandex    #
+#  UwU             #
+#       by qigan   #
+#                  #
+####################`
+
+
 const ydt = "[Yandex Drochebink]"
 
 var await_iter = 0;
 var last = false;
 var lam = 0;
 
-function createSolutionFromResponse(obj) {
-    var resultString = "";
-    let s = Object.entries(obj["attempt"]["markers"]["result"]);
-    for (var i = 0; i < s.length; i++) {
-        let part = s[i][1]["check_details"];
-        for (var j = 0; j < part["input"]["data"].length; j++) {
-            part["input"]["data"][j] = "'" + part["input"]["data"][j] + "'"
-        }
-        resultString += `if a==[${part["input"]["data"]}]: print(\\"\\"\\"${part["check_results"][0]["correct_answer"]}\\"\\"\\")\n`
-   }
-   let prefix = "a = []\nwhile True:\n    try:\n        a.append(input())\n    except EOFError:break\n"
+/*
+s = [<ответы по порядку>]
+z = 0
+try:
+    z = int(open('file.txt', 'r').read())
+except:
+    1
 
-   return prefix + "\n" + resultString
+print(s[z])
+open('file.txt', 'w').write(str(z+1))
+*/
+
+function createSolutionFromResponse(obj) {
+    var resultString = "s = ["
+    for (var i = 0; i < obj.length; i++) {
+        resultString += `"""${obj[i].correct_answer.replaceAll("\"", "\\\"")}""",`
+    }
+    resultString = resultString.substring(0, resultString.length-1) + "]\n"
+    resultString += "z = 0\ntry:\n    z = int(open('file.txt', 'r').read())\nexcept:\n    pass\nprint(s[z])\nopen('file.txt', 'w').write(str(z+1))\n"
+
+    return comSec + "\n" + resultString
 }
 
 // const srcFetch = fetch;
@@ -29,60 +65,56 @@ function createSolutionFromResponse(obj) {
 
 // 158644695 593794427
 
-async function solvePers() {
-    await solve(parseWindowCfg())
-}
 
-async function solve(cfg) {
-    let partial = await requestApi(cfg, "print('Huge mistake')")
-    partial.json().then((x) => {
-        requestApi(cfg, createSolutionFromResponse(x))
-        console.log(`${ydt} solved case ${cfg["lpl_id"]}`)
-        await_iter++
-        if (last) {
-            console.log(`${ydt} finished. Case solved ${await_iter}/${lam}`)
-        }
-    }).catch((x) => {
-        console.log(`${ydt} failed to solve case ${cfg["lpl_id"]}`)
+async function solve(lesson, num) {
+    var pobj = parseWindowCfg()
+    let xd = await fetch(`https://education.yandex.ru/classroom/api/get-latest-clesson-result/${lesson}/`)
+    xd.json().then(async (y) => {
+        let clr = y.id;
+        (await fetch(`https://education.yandex.ru/classroom/api/get-clesson-run/${lesson}/`)).json().then(async (z) => {
+            for (var k = 0; k < z.problems.length; k++) {
+                let lpl = z.problems[k].id
+                let solution = z.problems[k].problem.markup.inputs
+                let ggf = {
+                    "clr_id": clr,
+                    "lpl_id": lpl,
+                    "sk": pobj["sk"],
+                    "urlpt": `https://education.yandex.ru/classroom/courses/${getCourse()}/assignments/${lesson}/run/${k + 1}/`
+                }
+                if (num == 0 || num == k+1) {
+                    try {
+                        (await postSolution(ggf, createSolutionFromResponse(solution))).json()
+                        .then((x) => {
+                            console.log(`${ydt} solved ${lpl}`)
+                        })
+                        .catch(console.log(`${ydt} failed ${lpl}`));
+                    } catch (ex) {
+                        console.log(`Error occured on ${lpl}`)
+                    }
+                }
+            }
+        });
     })
 }
 
-async function solveAllC(amount) {
-    let pobj = parseWindowCfg()
-    await_iter = 0
-    last = false
-    lam = amount
-    for (var i = 0; i < amount; i++) {
-        let smpc = pobj["urlpt"].split('/')
-        smpc[smpc.length-2] = (Number.parseInt(smpc[smpc.length-2])+i).toString()
-        solve({
-            "clr_id": pobj["clr_id"],
-            "lpl_id": pobj["lpl_id"]+i,
-            "sk": pobj["sk"],
-            "urlpt": smpc.join('/')
-        })
-        if (i==amount-1) last = true
-    }
-}
-
-async function requestApi(pobj, code) {
+async function postSolution(pobj, code) {
     return await fetch("https://education.yandex.ru/classroom/api/v2/post-attempts/", {
-    "credentials": "include",
-    "headers": {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0",
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Content-Type": "application/json",
-        "X-Correlation-ID": "053e5b78-ec7a-4213-8eb7-9e060c22885c",
-        "x-csrf-token": "DK0EIdgv-3cczqtrVTxo41P-XFqTz6aGj3FM",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-origin"
-    },
-    "referrer": `https://education.yandex.ru${pobj.urlpt}`,
-    "body": `{\"lpl_id\":${pobj.lpl_id},\"clr_id\":${pobj.clr_id},\"attempt\":{\"answered\":true,\"completed\":true,\"markers\":{\"user_answer\":{\"code\":\"${code.replaceAll("\n", "\\n")}\",\"language\":\"python\"}}},\"sk\":\"kcAHJdOf-Jn27oyaSixbv3QQ2_LZ_BM7ULDk\"}`,
-    "method": "POST",
-    "mode": "cors"
+        "credentials": "include",
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0",
+            "Accept": "*/*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Content-Type": "application/json",
+            "X-Correlation-ID": "2eb741d7-6f2a-43ab-bcea-7b1e57391bf2",
+            "x-csrf-token": pobj["sk"],
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin"
+        },
+        "referrer": `https://education.yandex.ru${pobj.urlpt}`,
+        "body": `{\"lpl_id\":${pobj.lpl_id},\"clr_id\":${pobj.clr_id},\"attempt\":{\"answered\":true,\"completed\":true,\"markers\":{\"user_answer\":{\"code\":\"${code.replaceAll("\\", "\\\\").replaceAll("\n", "\\n").replaceAll("\"", "\\\"")}\",\"language\":\"python\"}}},\"sk\":\"${pobj["sk"]}\"}`,
+        "method": "POST",
+        "mode": "cors"
     });
 }
 
@@ -92,26 +124,10 @@ async function requestLessons(id) {
 
 async function demolish() {
     let zv = await requestLessons(getCourse())
-    let pobj = parseWindowCfg()
     zv.json().then(async (x) => {
         for (var i = 0; i < x.clessons.length; i++) {
             let id = x.clessons[i].id
-            let xd = await fetch(`https://education.yandex.ru/classroom/api/get-latest-clesson-result/${id}/`)
-            xd.json().then(async (y) => {
-                let clr = y.id;
-                (await fetch(`https://education.yandex.ru/classroom/api/get-clesson-run/${id}/`)).json().then(async (z) => {
-                    for (var k = 0; k < z.problems.length; k++) {
-                        let lpl = z.problems[k].id
-                        let ggf = {
-                            "clr_id": clr,
-                            "lpl_id": lpl,
-                            "sk": pobj["sk"],
-                            "urlpt": `https://education.yandex.ru/classroom/courses/${getCourse()}/assignments/${id}/run/${k+1}/`
-                        }
-                        solve(ggf)
-                    }
-                });
-            })
+            solve(id, 0)
         }
     })
 }
@@ -131,19 +147,3 @@ function parseWindowCfg() {
     }
 }
 
-//Наказание за одноконтейнерность!!!
-/*
-s = [<ответы по порядку>]
-z = 0
-try:
-    z = int(open('file.txt', 'r').read())
-except:
-    1
-
-print(s[z])
-open('file.txt', 'w').write(str(z+1))
-*/
-//Данный код решает любой 
-
-//593479692 593479534
-//158602081 158615971
