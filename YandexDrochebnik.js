@@ -75,11 +75,13 @@ async function solve(lesson, num) {
             for (var k = 0; k < z.problems.length; k++) {
                 let lpl = z.problems[k].id
                 let solution = z.problems[k].problem.markup.inputs
+                let asws = z.problems[k].problem.markup?.answers
                 let ggf = {
                     "clr_id": clr,
                     "lpl_id": lpl,
                     "sk": pobj["sk"],
-                    "urlpt": `https://education.yandex.ru/classroom/courses/${getCourse()}/assignments/${lesson}/run/${k + 1}/`
+                    "urlpt": `https://education.yandex.ru/classroom/courses/${getCourse()}/assignments/${lesson}/run/${k + 1}/`,
+                    "lesson": lesson
                 }
                 if (num == 0 || num == k+1) {
                     try {
@@ -87,9 +89,33 @@ async function solve(lesson, num) {
                         .then((x) => {
                             console.log(`${ydt} solved ${lpl}`)
                         })
-                        .catch(console.log(`${ydt} failed ${lpl}`));
+                        .catch((x) => console.log(`${ydt} failed ${lpl}`));
                     } catch (ex) {
                         console.log(`Error occured on ${lpl}`)
+                    }
+                    try {
+                        asw_builder = "{"
+                        if (asws != undefined) {
+                            for (let [id, asw] of Object.entries(asws)) {
+                                if (!(asw instanceof Array)) {
+                                    asw = asw[1]
+                                }
+                                let partM = asw.length == 1 ? `[${asw}]` : asw
+                                if (partM instanceof String) {partM = `\"${partM}\"`}
+                                console.log(partM)
+                                asw_builder += `\\"${id}\\\":\{\\"user_answer\\":${partM}`+"},"
+                            }
+                            asw_builder = asw_builder.substring(0, asw_builder.length-2) + "}}"
+                            console.log(asw_builder)
+                            return
+                            (await solvePresentation(ggf, asw_builder)).json()
+                            .then((x) => {
+                                console.log(`${ydt} solved ${lpl}`)
+                            })
+                            .catch((x) => console.log(`${ydt} failed ${lpl}`));
+                            }
+                    } catch (ex) {
+
                     }
                 }
             }
@@ -145,5 +171,27 @@ function parseWindowCfg() {
         "sk": window._data.config.sk,
         "urlpt": window._data.url
     }
+}
+
+async function solvePresentation(pobj, answer) {
+
+    await fetch("https://education.yandex.ru/classroom/api/patch-clesson-results/", {
+    "credentials": "include",
+    "headers": {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0",
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Content-Type": "application/json",
+        "X-Correlation-ID": "ab29b60f-2170-4e68-acc6-394dbed0b012",
+        "x-csrf-token": pobj["sk"],
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin"
+    },
+    "referrer": "https://education.yandex.ru/classroom/courses/14242470/assignments/249234592/run/5/",
+    "body": `{\"clessonId\":${pobj["lesson"]},\"isEvaluable\":null,\"problemLinkId\":${pobj["lpl_id"]},\"resultId\":${pobj["clr_id"]},\"answered\":true,\"completed\":true,\"dateUpdated\":\"2025-02-19T09:24:37.273372Z\",\"answer\":\"${answer}\",\"sk\":\"${pobj["sk"]}\"}`,
+    "method": "POST",
+    "mode": "cors"
+});
 }
 
