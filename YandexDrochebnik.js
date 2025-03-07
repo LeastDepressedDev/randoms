@@ -31,6 +31,7 @@ const ydt = "[Yandex Drochebink]"
 var await_iter = 0;
 var last = false;
 var lam = 0;
+var obbp = {}
 
 /*
 s = [<ответы по порядку>]
@@ -74,7 +75,8 @@ async function solve(lesson, num) {
         (await fetch(`https://education.yandex.ru/classroom/api/get-clesson-run/${lesson}/`)).json().then(async (z) => {
             for (var k = 0; k < z.problems.length; k++) {
                 let lpl = z.problems[k].id
-                let solution = z.problems[k].problem.markup.inputs
+                let solution = z.problems[k].problem.markup?.inputs
+                let layout = z.problems[k].problem.markup?.layout
                 let asws = z.problems[k].problem.markup?.answers
                 let ggf = {
                     "clr_id": clr,
@@ -84,6 +86,7 @@ async function solve(lesson, num) {
                     "lesson": lesson
                 }
                 if (num == 0 || num == k+1) {
+                    if (solution == undefined) continue;
                     try {
                         (await postSolution(ggf, createSolutionFromResponse(solution))).json()
                         .then((x) => {
@@ -92,21 +95,28 @@ async function solve(lesson, num) {
                         .catch((x) => console.log(`${ydt} failed ${lpl}`));
                     } catch (ex) {
                         console.log(`Error occured on ${lpl}`)
+                        console.log(ex)
                     }
                     try {
-                        asw_builder = "{"
+                        builder_asw = "\\\"{"
                         if (asws != undefined) {
-                            for (let [id, asw] of Object.entries(asws)) {
-                                if (!(asw instanceof Array)) {
-                                    asw = asw[1]
+                            for (var v of layout) {
+                                if (v?.kind != "text") {
+                                    let asw = asws[v.content.id]
+                                    switch (v.content.type) {
+                                        case "choice":
+                                            builder_asw+=`\\\"${v.content.id}\\\":{\\"user_answer\\":${asw instanceof Array && asw.length > 1 ? asw : "[" + asw + "]"}}`
+                                        break
+                                    }
+                                    obbp = asw
+                                    console.log(`${v?.content?.id} - ${v?.content?.type}`)
+                                    console.log(obbp)
                                 }
-                                let partM = asw.length == 1 ? `[${asw}]` : asw
-                                if (partM instanceof String) {partM = `\"${partM}\"`}
-                                console.log(partM)
-                                asw_builder += `\\"${id}\\\":\{\\"user_answer\\":${partM}`+"},"
+                               
                             }
-                            asw_builder = asw_builder.substring(0, asw_builder.length-2) + "}}"
-                            console.log(asw_builder)
+
+
+                            
                             return
                             (await solvePresentation(ggf, asw_builder)).json()
                             .then((x) => {
@@ -115,7 +125,7 @@ async function solve(lesson, num) {
                             .catch((x) => console.log(`${ydt} failed ${lpl}`));
                             }
                     } catch (ex) {
-
+                        console.log(ex)
                     }
                 }
             }
