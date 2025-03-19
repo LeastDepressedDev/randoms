@@ -32,6 +32,7 @@ var await_iter = 0;
 var last = false;
 var lam = 0;
 var obbp = {}
+var manual = false
 
 /*
 s = [<ответы по порядку>]
@@ -45,14 +46,18 @@ print(s[z])
 open('file.txt', 'w').write(str(z+1))
 */
 
-function createSolutionFromResponse(obj) {
-    var resultString = "s = ["
-    for (var i = 0; i < obj.length; i++) {
-        resultString += `"""${obj[i].correct_answer.replaceAll("\"", "\\\"")}""",`
+function createSolutionFromResponse(obj, author) {
+    var resultString;
+    if (manual || author == undefined) {
+        resultString = "s = ["
+        for (var i = 0; i < obj.length; i++) {
+            resultString += `"""${obj[i].correct_answer.replaceAll("\"", "\\\"")}""",`
+        }
+        resultString = resultString.substring(0, resultString.length-1) + "]\n"
+        resultString += "z = 0\ntry:\n    z = int(open('file.txt', 'r').read())\nexcept:\n    pass\nprint(s[z])\nopen('file.txt', 'w').write(str(z+1))\n"
+    } else {
+        resultString = author
     }
-    resultString = resultString.substring(0, resultString.length-1) + "]\n"
-    resultString += "z = 0\ntry:\n    z = int(open('file.txt', 'r').read())\nexcept:\n    pass\nprint(s[z])\nopen('file.txt', 'w').write(str(z+1))\n"
-
     return comSec + "\n" + resultString
 }
 
@@ -73,62 +78,67 @@ async function solve(lesson, num) {
     xd.json().then(async (y) => {
         let clr = y.id;
         (await fetch(`https://education.yandex.ru/classroom/api/get-clesson-run/${lesson}/`)).json().then(async (z) => {
-            for (var k = 0; k < z.problems.length; k++) {
-                let lpl = z.problems[k].id
-                let solution = z.problems[k].problem.markup?.inputs
-                let layout = z.problems[k].problem.markup?.layout
-                let asws = z.problems[k].problem.markup?.answers
-                let ggf = {
-                    "clr_id": clr,
-                    "lpl_id": lpl,
-                    "sk": pobj["sk"],
-                    "urlpt": `https://education.yandex.ru/classroom/courses/${getCourse()}/assignments/${lesson}/run/${k + 1}/`,
-                    "lesson": lesson
-                }
-                if (num == 0 || num == k+1) {
-                    if (solution == undefined) continue;
-                    try {
-                        (await postSolution(ggf, createSolutionFromResponse(solution))).json()
-                        .then((x) => {
-                            console.log(`${ydt} solved ${lpl}`)
-                        })
-                        .catch((x) => console.log(`${ydt} failed ${lpl}`));
-                    } catch (ex) {
-                        console.log(`Error occured on ${lpl}`)
-                        console.log(ex)
+            //setTimeout(async () => {
+                for (var k = 0; k < z.problems.length; k++) {
+                    let lpl = z.problems[k].id
+                    let solution = z.problems[k].problem.markup?.inputs
+                    let layout = z.problems[k].problem.markup?.layout
+                    let asws = z.problems[k].problem.markup?.answers
+                    let author = z.problems[k].problem.markup?.languages
+                    if (author != undefined) author = author[0]?.author_solution
+                    let ggf = {
+                        "clr_id": clr,
+                        "lpl_id": lpl,
+                        "sk": pobj["sk"],
+                        "urlpt": `https://education.yandex.ru/classroom/courses/${getCourse()}/assignments/${lesson}/run/${k + 1}/`,
+                        "lesson": lesson
                     }
-                    try {
-                        builder_asw = "\\\"{"
-                        if (asws != undefined) {
-                            for (var v of layout) {
-                                if (v?.kind != "text") {
-                                    let asw = asws[v.content.id]
-                                    switch (v.content.type) {
-                                        case "choice":
-                                            builder_asw+=`\\\"${v.content.id}\\\":{\\"user_answer\\":${asw instanceof Array && asw.length > 1 ? asw : "[" + asw + "]"}}`
-                                        break
+                    if (num == 0 || num == k+1) {
+                        if (solution != undefined || author != undefined) {
+                            try {
+                                (await postSolution(ggf, createSolutionFromResponse(solution, author))).json()
+                                .then((x) => {
+                                    console.log(`${ydt} solved ${lpl}`)
+                                })
+                                .catch((x) => console.log(`${ydt} failed ${lpl}`));
+                            } catch (ex) {
+                                console.log(`Error occured on ${lpl}`)
+                                console.log(ex)
+                            }
+                        }
+                        try {
+                            builder_asw = "\\\"{"
+                            if (asws != undefined) {
+                                for (var v of layout) {
+                                    if (v?.kind != "text") {
+                                        let asw = asws[v.content.id]
+                                        switch (v.content.type) {
+                                            case "choice":
+                                                builder_asw+=`\\\"${v.content.id}\\\":{\\"user_answer\\":${asw instanceof Array && asw.length > 1 ? asw : "[" + asw + "]"}}`
+                                            break
+                                        }
+                                        obbp = asw
+                                        console.log(`${v?.content?.id} - ${v?.content?.type}`)
+                                        console.log(obbp)
                                     }
-                                    obbp = asw
-                                    console.log(`${v?.content?.id} - ${v?.content?.type}`)
-                                    console.log(obbp)
+                                   
                                 }
-                               
-                            }
-
-
-                            
-                            return
-                            (await solvePresentation(ggf, asw_builder)).json()
-                            .then((x) => {
-                                console.log(`${ydt} solved ${lpl}`)
-                            })
-                            .catch((x) => console.log(`${ydt} failed ${lpl}`));
-                            }
-                    } catch (ex) {
-                        console.log(ex)
+    
+    
+                                
+                                continue
+                                (await solvePresentation(ggf, asw_builder)).json()
+                                .then((x) => {
+                                    console.log(`${ydt} solved ${lpl}`)
+                                })
+                                .catch((x) => console.log(`${ydt} failed ${lpl}`));
+                                }
+                        } catch (ex) {
+                            console.log(ex)
+                        }
                     }
                 }
-            }
+            //}, 1000);
         });
     })
 }
