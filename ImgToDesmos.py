@@ -8,7 +8,7 @@ from PIL import Image
 c_dist = 23
 
 # Clusterizing steps
-c_steps = 5
+c_steps = 0
 
 # Limiting area
 area = [0,0,1000,1000]
