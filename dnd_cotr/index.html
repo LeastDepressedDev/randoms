@@ -917,6 +917,7 @@
                 letter-spacing: 0.8px;
                 color: #4a6a85;
                 margin-bottom: 4px;
+                transition: color 0.2s ease;
             }
 
             .stat-value {
@@ -1073,6 +1074,7 @@
                 padding-top: 14px;
                 border-top: 2px solid #d0dfee;
                 margin-bottom: 10px;
+                transition: color 0.2s ease;
             }
 
             .effects-list {
@@ -1244,6 +1246,7 @@
                 font-size: 0.95rem;
                 font-weight: 400;
                 color: #1e3347;
+                transition: color 0.2s ease;
             }
 
             .skill-ability {
@@ -1254,6 +1257,7 @@
                 padding: 0px 8px;
                 border-radius: 4px;
                 font-style: italic;
+                transition: color 0.2s ease;
             }
 
             .skill-value {
@@ -1319,6 +1323,7 @@
                 padding-top: 14px;
                 border-top: 2px solid #d0dfee;
                 margin-bottom: 10px;
+                transition: color 0.2s ease;
             }
 
             .proficiency-list {
@@ -1429,6 +1434,7 @@
                 font-weight: 500;
                 align-self: flex-start;
                 letter-spacing: 0.3px;
+                transition: color 0.2s ease;
             }
 
             .proficiency-add-btn:hover {
@@ -1453,6 +1459,7 @@
                 font-weight: 500;
                 color: #1e3347;
                 white-space: nowrap;
+                transition: color 0.2s ease;
             }
 
             .progression-value {
@@ -1481,6 +1488,7 @@
                 font-weight: 500;
                 color: #1e3347;
                 white-space: nowrap;
+                transition: color 0.2s ease;
             }
 
             .progression-level-value {
@@ -1510,6 +1518,7 @@
                 font-weight: 500;
                 color: #1e3347;
                 white-space: nowrap;
+                transition: color 0.2s ease;
             }
 
             .progression-next-level-value {
@@ -1556,6 +1565,7 @@
                 padding-top: 12px;
                 border-top: 2px solid #d0dfee;
                 margin-bottom: 10px;
+                transition: color 0.2s ease;
             }
 
             .exp-changes-list {
@@ -1659,6 +1669,7 @@
                 font-weight: 500;
                 align-self: flex-start;
                 letter-spacing: 0.3px;
+                transition: color 0.2s ease;
             }
 
             .change-add-btn:hover {
@@ -1718,6 +1729,7 @@
                 align-self: flex-start;
                 letter-spacing: 0.3px;
                 margin-bottom: 4px;
+                transition: color 0.2s ease;
             }
 
             .notes-add-btn:hover {
@@ -1817,13 +1829,60 @@
             }
 
             /* ============================================================
-               PAGE INFO SIGN — bottom-right corner
+               BOTTOM-RIGHT CLUSTER — Language switch + Info button
                ============================================================ */
-            .page-info {
+            .bottom-cluster {
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
                 z-index: 999;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            /* Language switch */
+            .lang-switch {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                background: #1e2b3c;
+                padding: 4px 12px;
+                border-radius: 30px;
+                border: 2px solid #3d556b;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+                user-select: none;
+                height: 40px;
+            }
+
+            .lang-switch label {
+                color: #8aa5c0;
+                font-size: 0.7rem;
+                font-weight: 500;
+                letter-spacing: 0.3px;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: 0.15s;
+                padding: 2px 6px;
+                border-radius: 4px;
+            }
+
+            .lang-switch label.active {
+                color: #f0f4fa;
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .lang-switch label:hover {
+                color: #f0f4fa;
+            }
+
+            .lang-switch .lang-separator {
+                color: #3d556b;
+                font-size: 0.8rem;
+            }
+
+            /* Page info button */
+            .page-info {
                 display: flex;
                 flex-direction: column;
                 align-items: flex-end;
@@ -1846,6 +1905,7 @@
                 user-select: none;
                 border: 2px solid #3d556b;
                 z-index: 1000;
+                flex-shrink: 0;
             }
 
             .page-info-btn:hover {
@@ -2198,6 +2258,20 @@
                     min-width: 200px;
                     font-size: 0.7rem;
                 }
+                .bottom-cluster {
+                    bottom: 14px;
+                    right: 14px;
+                    gap: 8px;
+                }
+                .lang-switch {
+                    padding: 3px 10px;
+                    height: 36px;
+                }
+                .page-info-btn {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 1rem;
+                }
             }
 
             @media (max-width: 600px) {
@@ -2343,22 +2417,6 @@
                 .notes-container {
                     gap: 12px;
                 }
-                .page-info-btn {
-                    width: 36px;
-                    height: 36px;
-                    font-size: 1rem;
-                }
-                .page-info {
-                    bottom: 14px;
-                    right: 14px;
-                }
-                .page-info-box {
-                    min-width: 180px;
-                    max-width: 260px;
-                    font-size: 0.75rem;
-                    padding: 12px 14px;
-                    bottom: calc(100% + 10px);
-                }
                 .console-window {
                     width: 95vw;
                     min-height: 240px;
@@ -2426,6 +2484,23 @@
                 .right-panel {
                     width: 100vw;
                     right: -100vw;
+                }
+                .bottom-cluster {
+                    bottom: 14px;
+                    right: 14px;
+                    gap: 8px;
+                }
+                .lang-switch {
+                    padding: 3px 10px;
+                    height: 34px;
+                }
+                .lang-switch label {
+                    font-size: 0.65rem;
+                }
+                .page-info-btn {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 1rem;
                 }
             }
 
@@ -2499,6 +2574,24 @@
                 .right-panel {
                     width: 100vw;
                     right: -100vw;
+                }
+                .bottom-cluster {
+                    bottom: 12px;
+                    right: 12px;
+                    gap: 6px;
+                }
+                .lang-switch {
+                    padding: 2px 8px;
+                    height: 32px;
+                }
+                .lang-switch label {
+                    font-size: 0.6rem;
+                    padding: 1px 4px;
+                }
+                .page-info-btn {
+                    width: 32px;
+                    height: 32px;
+                    font-size: 0.9rem;
                 }
             }
 
@@ -2681,26 +2774,6 @@
                 .note-header {
                     gap: 8px;
                 }
-                .page-info-btn {
-                    width: 32px;
-                    height: 32px;
-                    font-size: 0.9rem;
-                }
-                .page-info {
-                    bottom: 10px;
-                    right: 10px;
-                }
-                .page-info-box {
-                    min-width: 160px;
-                    max-width: 220px;
-                    font-size: 0.7rem;
-                    padding: 10px 12px;
-                    bottom: calc(100% + 8px);
-                    right: -4px;
-                }
-                .page-info-box .info-title {
-                    font-size: 0.85rem;
-                }
                 .console-window {
                     width: 98vw;
                     min-height: 200px;
@@ -2796,6 +2869,35 @@
                     width: 100vw;
                     right: -100vw;
                 }
+                .bottom-cluster {
+                    bottom: 10px;
+                    right: 10px;
+                    gap: 6px;
+                }
+                .lang-switch {
+                    padding: 2px 6px;
+                    height: 28px;
+                }
+                .lang-switch label {
+                    font-size: 0.55rem;
+                    padding: 1px 3px;
+                }
+                .lang-switch .lang-separator {
+                    font-size: 0.6rem;
+                }
+                .page-info-btn {
+                    width: 28px;
+                    height: 28px;
+                    font-size: 0.8rem;
+                }
+                .page-info-box {
+                    min-width: 160px;
+                    max-width: 220px;
+                    font-size: 0.7rem;
+                    padding: 10px 12px;
+                    bottom: calc(100% + 8px);
+                    right: -4px;
+                }
             }
 
             @media (max-width: 380px) {
@@ -2833,6 +2935,24 @@
                 .right-panel {
                     width: 100vw;
                     right: -100vw;
+                }
+                .bottom-cluster {
+                    bottom: 8px;
+                    right: 8px;
+                    gap: 4px;
+                }
+                .lang-switch {
+                    padding: 2px 4px;
+                    height: 24px;
+                }
+                .lang-switch label {
+                    font-size: 0.5rem;
+                    padding: 1px 2px;
+                }
+                .page-info-btn {
+                    width: 24px;
+                    height: 24px;
+                    font-size: 0.7rem;
                 }
             }
         </style>
@@ -2923,7 +3043,7 @@
                 <div class="panel-content">
                     <!-- Name row: label + editable field (underline only, no placeholder) -->
                     <div class="name-row">
-                        <span class="name-label">Name:</span>
+                        <span class="name-label" id="name-label">Name:</span>
                         <input type="text" class="name-input" id="characterName">
                     </div>
 
@@ -2932,7 +3052,7 @@
                         <!-- HP Row (larger font, consistent layout) -->
                         <div class="stat-line stat-line-hp">
                             <div class="stat-line-left">
-                                <span class="stat-line-label">HP</span>
+                                <span class="stat-line-label" id="hp-label">HP</span>
                             </div>
                             <div class="stat-line-left">
                                 <input type="text" class="stat-line-hp-input" id="cur-hp" value="0" placeholder="0">
@@ -2944,7 +3064,7 @@
                         <!-- Mastery Row -->
                         <div class="stat-line">
                             <div class="stat-line-left">
-                                <span class="stat-line-label">Mastery</span>
+                                <span class="stat-line-label" id="mastery-label">Mastery</span>
                             </div>
                             <span id="mastery-mod" class="stat-line-value">+0</span>
                         </div>
@@ -2952,9 +3072,9 @@
                         <!-- Armor Class Row with hover reveal and border -->
                         <div class="stat-line">
                             <div class="stat-line-left">
-                                <span class="stat-line-label">Armor class:</span>
+                                <span class="stat-line-label" id="armor-class-label">Armor class:</span>
                                 <span class="stat-base-wrapper">
-                                    <span class="stat-base-label-small">base value:</span>
+                                    <span class="stat-base-label-small" id="base-value-label">base value:</span>
                                     <input type="text" class="stat-base-input-small" id="ac-base" placeholder="0">
                                 </span>
                             </div>
@@ -2964,9 +3084,9 @@
                         <!-- Speed Row with hover reveal and border -->
                         <div class="stat-line">
                             <div class="stat-line-left">
-                                <span class="stat-line-label">Speed:</span>
+                                <span class="stat-line-label" id="speed-label">Speed:</span>
                                 <span class="stat-base-wrapper">
-                                    <span class="stat-base-label-small">base value:</span>
+                                    <span class="stat-base-label-small" id="base-value-label-2">base value:</span>
                                     <input type="text" class="stat-base-input-small" id="spd-base" placeholder="0">
                                 </span>
                             </div>
@@ -2990,12 +3110,12 @@
                     <div class="stats-row">
                         <!-- Str -->
                         <div class="stat-box">
-                            <div class="stat-title">Str</div>
+                            <div class="stat-title" id="stat-title-Str">Str</div>
                             <div class="stat-value" id="stat.Str">0</div>
                             <div class="stat-bonus" id="bonus.Str">0</div>
                             <div class="stat-base-row">
                                 <input type="text" class="stat-base-input" id="stat.base.Str" value="10" placeholder="Number">
-                                <span class="stat-base-label">Base value</span>
+                                <span class="stat-base-label" id="base-value-label-3">Base value</span>
                             </div>
                             <div class="stat-sub-box">
                                 <span class="stat-sub-value" id="st.Str">0</span>
@@ -3004,7 +3124,7 @@
                         </div>
                         <!-- Dex -->
                         <div class="stat-box">
-                            <div class="stat-title">Dex</div>
+                            <div class="stat-title" id="stat-title-Dex">Dex</div>
                             <div class="stat-value" id="stat.Dex">0</div>
                             <div class="stat-bonus" id="bonus.Dex">0</div>
                             <div class="stat-base-row">
@@ -3018,7 +3138,7 @@
                         </div>
                         <!-- Con -->
                         <div class="stat-box">
-                            <div class="stat-title">Con</div>
+                            <div class="stat-title" id="stat-title-Con">Con</div>
                             <div class="stat-value" id="stat.Con">0</div>
                             <div class="stat-bonus" id="bonus.Con">0</div>
                             <div class="stat-base-row">
@@ -3032,7 +3152,7 @@
                         </div>
                         <!-- Int -->
                         <div class="stat-box">
-                            <div class="stat-title">Int</div>
+                            <div class="stat-title" id="stat-title-Int">Int</div>
                             <div class="stat-value" id="stat.Int">0</div>
                             <div class="stat-bonus" id="bonus.Int">0</div>
                             <div class="stat-base-row">
@@ -3046,7 +3166,7 @@
                         </div>
                         <!-- Wis -->
                         <div class="stat-box">
-                            <div class="stat-title">Wis</div>
+                            <div class="stat-title" id="stat-title-Wis">Wis</div>
                             <div class="stat-value" id="stat.Wis">0</div>
                             <div class="stat-bonus" id="bonus.Wis">0</div>
                             <div class="stat-base-row">
@@ -3060,7 +3180,7 @@
                         </div>
                         <!-- Cha -->
                         <div class="stat-box">
-                            <div class="stat-title">Cha</div>
+                            <div class="stat-title" id="stat-title-Cha">Cha</div>
                             <div class="stat-value" id="stat.Cha">0</div>
                             <div class="stat-bonus" id="bonus.Cha">0</div>
                             <div class="stat-base-row">
@@ -3075,7 +3195,7 @@
                     </div>
 
                     <!-- Effects Subsection -->
-                    <div class="effects-subtitle">Effects</div>
+                    <div class="effects-subtitle" id="effects-title">Effects</div>
 
                     <!-- Effects interactive list -->
                     <div class="effects-list" id="statEffects-list">
@@ -3083,7 +3203,7 @@
                     </div>
 
                     <!-- Add button -->
-                    <button class="effects-add-btn" id="statEffects-add-btn">Add Effect</button>
+                    <button class="effects-add-btn" id="effects-add-btn">Add Effect</button>
 
                 </div>
             </div>
@@ -3093,190 +3213,190 @@
                    ========================================================== -->
             <div class="exp-panel">
                 <div class="panel-content">
-                    <div class="panel-title">Abilities</div>
+                    <div class="panel-title" id="abilities-title">Abilities</div>
 
                     <!-- Athletics -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Athletics</span>
-                            <span class="skill-ability">(STR)</span>
+                            <span class="skill-label" id="sk-label-Athletics">Athletics</span>
+                            <span class="skill-ability" id="sk-ability-Athletics">(STR)</span>
                         </div>
                         <span class="skill-value" id="sk.Athletics">0</span>
-                        <span class="skill-tooltip">Climbing, jumping, or swimming through rough conditions.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Athletics">Climbing, jumping, or swimming through rough conditions.</span>
                     </div>
 
                     <!-- Acrobatics -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Acrobatics</span>
-                            <span class="skill-ability">(DEX)</span>
+                            <span class="skill-label" id="sk-label-Acrobatics">Acrobatics</span>
+                            <span class="skill-ability" id="sk-ability-Acrobatics">(DEX)</span>
                         </div>
                         <span class="skill-value" id="sk.Acrobatics">0</span>
-                        <span class="skill-tooltip">Balancing, tumbling, or staying on your feet.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Acrobatics">Balancing, tumbling, or staying on your feet.</span>
                     </div>
 
                     <!-- Sleight of Hand -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Sleight of Hand</span>
-                            <span class="skill-ability">(DEX)</span>
+                            <span class="skill-label" id="sk-label-Sleight_of_Hand">Sleight of Hand</span>
+                            <span class="skill-ability" id="sk-ability-Sleight_of_Hand">(DEX)</span>
                         </div>
                         <span class="skill-value" id="sk.Sleight_of_Hand">0</span>
-                        <span class="skill-tooltip">Trickery, picking pockets, or concealing objects.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Sleight_of_Hand">Trickery, picking pockets, or concealing objects.</span>
                     </div>
 
                     <!-- Stealth -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Stealth</span>
-                            <span class="skill-ability">(DEX)</span>
+                            <span class="skill-label" id="sk-label-Stealth">Stealth</span>
+                            <span class="skill-ability" id="sk-ability-Stealth">(DEX)</span>
                         </div>
                         <span class="skill-value" id="sk.Stealth">0</span>
-                        <span class="skill-tooltip">Hiding and moving silently past enemies.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Stealth">Hiding and moving silently past enemies.</span>
                     </div>
 
                     <!-- Arcana -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Arcana</span>
-                            <span class="skill-ability">(INT)</span>
+                            <span class="skill-label" id="sk-label-Arcana">Arcana</span>
+                            <span class="skill-ability" id="sk-ability-Arcana">(INT)</span>
                         </div>
                         <span class="skill-value" id="sk.Arcana">0</span>
-                        <span class="skill-tooltip">Knowledge of spells, magic items, and magical traditions.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Arcana">Knowledge of spells, magic items, and magical traditions.</span>
                     </div>
 
                     <!-- History -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">History</span>
-                            <span class="skill-ability">(INT)</span>
+                            <span class="skill-label" id="sk-label-History">History</span>
+                            <span class="skill-ability" id="sk-ability-History">(INT)</span>
                         </div>
                         <span class="skill-value" id="sk.History">0</span>
-                        <span class="skill-tooltip">Recall of historical events, past rulers, and ancient kingdoms.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-History">Recall of historical events, past rulers, and ancient kingdoms.</span>
                     </div>
 
                     <!-- Investigation -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Investigation</span>
-                            <span class="skill-ability">(INT)</span>
+                            <span class="skill-label" id="sk-label-Investigation">Investigation</span>
+                            <span class="skill-ability" id="sk-ability-Investigation">(INT)</span>
                         </div>
                         <span class="skill-value" id="sk.Investigation">0</span>
-                        <span class="skill-tooltip">Deducing clues, searching areas logically, and finding hidden details.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Investigation">Deducing clues, searching areas logically, and finding hidden details.</span>
                     </div>
 
                     <!-- Nature -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Nature</span>
-                            <span class="skill-ability">(INT)</span>
+                            <span class="skill-label" id="sk-label-Nature">Nature</span>
+                            <span class="skill-ability" id="sk-ability-Nature">(INT)</span>
                         </div>
                         <span class="skill-value" id="sk.Nature">0</span>
-                        <span class="skill-tooltip">Knowledge of terrain, plants, animals, and weather.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Nature">Knowledge of terrain, plants, animals, and weather.</span>
                     </div>
 
                     <!-- Religion -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Religion</span>
-                            <span class="skill-ability">(INT)</span>
+                            <span class="skill-label" id="sk-label-Religion">Religion</span>
+                            <span class="skill-ability" id="sk-ability-Religion">(INT)</span>
                         </div>
                         <span class="skill-value" id="sk.Religion">0</span>
-                        <span class="skill-tooltip">Recall of deities, holy symbols, and religious rites.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Religion">Recall of deities, holy symbols, and religious rites.</span>
                     </div>
 
                     <!-- Animal Handling -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Animal Handling</span>
-                            <span class="skill-ability">(WIS)</span>
+                            <span class="skill-label" id="sk-label-Animal_Handling">Animal Handling</span>
+                            <span class="skill-ability" id="sk-ability-Animal_Handling">(WIS)</span>
                         </div>
                         <span class="skill-value" id="sk.Animal_Handling">0</span>
-                        <span class="skill-tooltip">Calming or predicting the behavior of animals.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Animal_Handling">Calming or predicting the behavior of animals.</span>
                     </div>
 
                     <!-- Insight -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Insight</span>
-                            <span class="skill-ability">(WIS)</span>
+                            <span class="skill-label" id="sk-label-Insight">Insight</span>
+                            <span class="skill-ability" id="sk-ability-Insight">(WIS)</span>
                         </div>
                         <span class="skill-value" id="sk.Insight">0</span>
-                        <span class="skill-tooltip">Reading a person's mood, intent, or truthfulness.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Insight">Reading a person's mood, intent, or truthfulness.</span>
                     </div>
 
                     <!-- Medicine -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Medicine</span>
-                            <span class="skill-ability">(WIS)</span>
+                            <span class="skill-label" id="sk-label-Medicine">Medicine</span>
+                            <span class="skill-ability" id="sk-ability-Medicine">(WIS)</span>
                         </div>
                         <span class="skill-value" id="sk.Medicine">0</span>
-                        <span class="skill-tooltip">Stabilizing the dying or diagnosing illnesses.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Medicine">Stabilizing the dying or diagnosing illnesses.</span>
                     </div>
 
                     <!-- Perception -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Perception</span>
-                            <span class="skill-ability">(WIS)</span>
+                            <span class="skill-label" id="sk-label-Perception">Perception</span>
+                            <span class="skill-ability" id="sk-ability-Perception">(WIS)</span>
                         </div>
                         <span class="skill-value" id="sk.Perception">0</span>
-                        <span class="skill-tooltip">Spotting, hearing, or sensing things in the environment.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Perception">Spotting, hearing, or sensing things in the environment.</span>
                     </div>
 
                     <!-- Survival -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Survival</span>
-                            <span class="skill-ability">(WIS)</span>
+                            <span class="skill-label" id="sk-label-Survival">Survival</span>
+                            <span class="skill-ability" id="sk-ability-Survival">(WIS)</span>
                         </div>
                         <span class="skill-value" id="sk.Survival">0</span>
-                        <span class="skill-tooltip">Tracking, navigating the wilderness, and predicting weather.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Survival">Tracking, navigating the wilderness, and predicting weather.</span>
                     </div>
 
                     <!-- Deception -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Deception</span>
-                            <span class="skill-ability">(CHA)</span>
+                            <span class="skill-label" id="sk-label-Deception">Deception</span>
+                            <span class="skill-ability" id="sk-ability-Deception">(CHA)</span>
                         </div>
                         <span class="skill-value" id="sk.Deception">0</span>
-                        <span class="skill-tooltip">Telling lies or misleading others convincingly.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Deception">Telling lies or misleading others convincingly.</span>
                     </div>
 
                     <!-- Intimidation -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Intimidation</span>
-                            <span class="skill-ability">(CHA)</span>
+                            <span class="skill-label" id="sk-label-Intimidation">Intimidation</span>
+                            <span class="skill-ability" id="sk-ability-Intimidation">(CHA)</span>
                         </div>
                         <span class="skill-value" id="sk.Intimidation">0</span>
-                        <span class="skill-tooltip">Threatening or coercing targets to get your way.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Intimidation">Threatening or coercing targets to get your way.</span>
                     </div>
 
                     <!-- Performance -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Performance</span>
-                            <span class="skill-ability">(CHA)</span>
+                            <span class="skill-label" id="sk-label-Performance">Performance</span>
+                            <span class="skill-ability" id="sk-ability-Performance">(CHA)</span>
                         </div>
                         <span class="skill-value" id="sk.Performance">0</span>
-                        <span class="skill-tooltip">Entertaining an audience through acting, music, or dance.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Performance">Entertaining an audience through acting, music, or dance.</span>
                     </div>
 
                     <!-- Persuasion -->
                     <div class="skill-line">
                         <div class="skill-line-left">
-                            <span class="skill-label">Persuasion</span>
-                            <span class="skill-ability">(CHA)</span>
+                            <span class="skill-label" id="sk-label-Persuasion">Persuasion</span>
+                            <span class="skill-ability" id="sk-ability-Persuasion">(CHA)</span>
                         </div>
                         <span class="skill-value" id="sk.Persuasion">0</span>
-                        <span class="skill-tooltip">Influencing people smoothly through diplomacy and tact.</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Persuasion">Influencing people smoothly through diplomacy and tact.</span>
                     </div>
 
                     <!-- Proficiency Subsection -->
-                    <div class="proficiency-subtitle">Proficiency</div>
+                    <div class="proficiency-subtitle" id="proficiency-title">Proficiency</div>
 
                     <!-- Proficiency interactive list -->
                     <div class="proficiency-list" id="proficiency-list">
@@ -3294,14 +3414,14 @@
                    ========================================================== -->
             <div id="charp-prog" class="exp-panel">
                 <div class="panel-content">
-                    <div class="panel-title">Progression</div>
+                    <div class="panel-title" id="progression-title">Progression</div>
 
                     <!-- Line 1: Exp label + value display -->
                     <div class="progression-row">
-                        <span class="progression-label">Exp:</span>
+                        <span class="progression-label" id="exp-label">Exp:</span>
                         <span class="progression-value" id="exp-val">0</span>
                         <span class="progression-level-group">
-                            <span class="progression-level-label">Level</span>
+                            <span class="progression-level-label" id="level-label">Level</span>
                             <span class="progression-level-paren">(</span>
                             <span class="progression-level-value" id="lvl">0</span>
                             <span class="progression-level-paren">)</span>
@@ -3310,7 +3430,7 @@
 
                     <!-- Line 2: Until level + next level exp -->
                     <div class="progression-row">
-                        <span class="progression-next-level">Until level</span>
+                        <span class="progression-next-level" id="until-level-label">Until level</span>
                         <span class="progression-next-level-value" id="next-lvl">0</span>
                         <span class="progression-separator">:</span>
                         <span class="progression-next-level-exp" id="next-lvl-exp">0</span>
@@ -3318,14 +3438,14 @@
 
                     <!-- Line 3: Until level 20 + exp to level 20 -->
                     <div class="progression-row">
-                        <span class="progression-next-level">Until level</span>
+                        <span class="progression-next-level" id="until-level-20-label">Until level</span>
                         <span class="progression-next-level-value">20</span>
                         <span class="progression-separator">:</span>
                         <span class="progression-next-level-exp" id="til-twenty">0</span>
                     </div>
 
                     <!-- Line 4: Changes subtitle -->
-                    <div class="changes-subtitle">Changes</div>
+                    <div class="changes-subtitle" id="changes-title">Changes</div>
 
                     <!-- Changes interactive list -->
                     <div class="exp-changes-list" id="exp-changes-list">
@@ -3343,7 +3463,7 @@
                    ========================================================== -->
             <div class="exp-panel">
                 <div class="panel-content">
-                    <div class="panel-title">Inventory</div>
+                    <div class="panel-title" id="inventory-title">Inventory</div>
                     <textarea id="inv-content" class="inventory-textarea" placeholder="Items here... Very intuitive to use I.G."></textarea>
                 </div>
             </div>
@@ -3353,7 +3473,7 @@
                    ========================================================== -->
             <div class="exp-panel">
                 <div class="panel-content">
-                    <div class="panel-title">Notes in text</div>
+                    <div class="panel-title" id="notes-title">Notes in text</div>
 
                     <div class="notes-container" id="notes-container">
                         <button class="notes-add-btn" id="add-note-btn">New note</button>
@@ -3365,20 +3485,30 @@
         </div>
 
         <!-- ==========================================================
-               PAGE INFO — bottom-right corner
+               BOTTOM-RIGHT CLUSTER — Language switch + Info button
                ========================================================== -->
-        <div class="page-info" id="page-info">
-            <div class="page-info-btn" id="page-info-btn">ⓘ</div>
-            <div class="page-info-box" id="page-info-box">
-                <span class="info-title">📜 Authors</span>
-                <span class="info-author">
-                    <strong>LeastDepressedDev</strong>
-                    (<a href="https://github.com/LeastDepressedDev/" target="_blank">GitHub</a>)
-                </span>
-                <span class="info-author">
-                    <strong>DeepSeek</strong>
-                    (<a href="https://deepseek.com" target="_blank">deepseek.com</a>)
-                </span>
+        <div class="bottom-cluster">
+            <!-- Language switch -->
+            <div class="lang-switch" id="lang-switch">
+                <label id="lang-en" class="active">EN</label>
+                <span class="lang-separator">|</span>
+                <label id="lang-ru">RU</label>
+            </div>
+
+            <!-- Page info button -->
+            <div class="page-info" id="page-info">
+                <div class="page-info-btn" id="page-info-btn">ⓘ</div>
+                <div class="page-info-box" id="page-info-box">
+                    <span class="info-title">📜 Authors</span>
+                    <span class="info-author">
+                        <strong>LeastDepressedDev</strong>
+                        (<a href="https://github.com/LeastDepressedDev/" target="_blank">GitHub</a>)
+                    </span>
+                    <span class="info-author">
+                        <strong>DeepSeek</strong>
+                        (<a href="https://deepseek.com" target="_blank">deepseek.com</a>)
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -3496,6 +3626,245 @@
                         closeRightPanel();
                     }
                 });
+
+                // =========================================================
+                // LANGUAGE SWITCH logic
+                // =========================================================
+                const langEn = document.getElementById('lang-en');
+                const langRu = document.getElementById('lang-ru');
+                let currentLang = 'en';
+
+                // Translation data
+                const translations = {
+                    en: {
+                        // Stats
+                        'stat-title-Str': 'Str',
+                        'stat-title-Dex': 'Dex',
+                        'stat-title-Con': 'Con',
+                        'stat-title-Int': 'Int',
+                        'stat-title-Wis': 'Wis',
+                        'stat-title-Cha': 'Cha',
+                        // Skills
+                        'sk-label-Athletics': 'Athletics',
+                        'sk-label-Acrobatics': 'Acrobatics',
+                        'sk-label-Sleight_of_Hand': 'Sleight of Hand',
+                        'sk-label-Stealth': 'Stealth',
+                        'sk-label-Arcana': 'Arcana',
+                        'sk-label-History': 'History',
+                        'sk-label-Investigation': 'Investigation',
+                        'sk-label-Nature': 'Nature',
+                        'sk-label-Religion': 'Religion',
+                        'sk-label-Animal_Handling': 'Animal Handling',
+                        'sk-label-Insight': 'Insight',
+                        'sk-label-Medicine': 'Medicine',
+                        'sk-label-Perception': 'Perception',
+                        'sk-label-Survival': 'Survival',
+                        'sk-label-Deception': 'Deception',
+                        'sk-label-Intimidation': 'Intimidation',
+                        'sk-label-Performance': 'Performance',
+                        'sk-label-Persuasion': 'Persuasion',
+                        // Skill abilities
+                        'sk-ability-Athletics': '(STR)',
+                        'sk-ability-Acrobatics': '(DEX)',
+                        'sk-ability-Sleight_of_Hand': '(DEX)',
+                        'sk-ability-Stealth': '(DEX)',
+                        'sk-ability-Arcana': '(INT)',
+                        'sk-ability-History': '(INT)',
+                        'sk-ability-Investigation': '(INT)',
+                        'sk-ability-Nature': '(INT)',
+                        'sk-ability-Religion': '(INT)',
+                        'sk-ability-Animal_Handling': '(WIS)',
+                        'sk-ability-Insight': '(WIS)',
+                        'sk-ability-Medicine': '(WIS)',
+                        'sk-ability-Perception': '(WIS)',
+                        'sk-ability-Survival': '(WIS)',
+                        'sk-ability-Deception': '(CHA)',
+                        'sk-ability-Intimidation': '(CHA)',
+                        'sk-ability-Performance': '(CHA)',
+                        'sk-ability-Persuasion': '(CHA)',
+                        // Skill tooltips
+                        'sk-tooltip-Athletics': 'Climbing, jumping, or swimming through rough conditions.',
+                        'sk-tooltip-Acrobatics': 'Balancing, tumbling, or staying on your feet.',
+                        'sk-tooltip-Sleight_of_Hand': 'Trickery, picking pockets, or concealing objects.',
+                        'sk-tooltip-Stealth': 'Hiding and moving silently past enemies.',
+                        'sk-tooltip-Arcana': 'Knowledge of spells, magic items, and magical traditions.',
+                        'sk-tooltip-History': 'Recall of historical events, past rulers, and ancient kingdoms.',
+                        'sk-tooltip-Investigation': 'Deducing clues, searching areas logically, and finding hidden details.',
+                        'sk-tooltip-Nature': 'Knowledge of terrain, plants, animals, and weather.',
+                        'sk-tooltip-Religion': 'Recall of deities, holy symbols, and religious rites.',
+                        'sk-tooltip-Animal_Handling': 'Calming or predicting the behavior of animals.',
+                        'sk-tooltip-Insight': "Reading a person's mood, intent, or truthfulness.",
+                        'sk-tooltip-Medicine': 'Stabilizing the dying or diagnosing illnesses.',
+                        'sk-tooltip-Perception': 'Spotting, hearing, or sensing things in the environment.',
+                        'sk-tooltip-Survival': 'Tracking, navigating the wilderness, and predicting weather.',
+                        'sk-tooltip-Deception': 'Telling lies or misleading others convincingly.',
+                        'sk-tooltip-Intimidation': 'Threatening or coercing targets to get your way.',
+                        'sk-tooltip-Performance': 'Entertaining an audience through acting, music, or dance.',
+                        'sk-tooltip-Persuasion': 'Influencing people smoothly through diplomacy and tact.',
+                        // Panel titles
+                        'abilities-title': 'Abilities',
+                        'proficiency-title': 'Proficiency',
+                        'progression-title': 'Progression',
+                        'inventory-title': 'Inventory',
+                        'notes-title': 'Notes in text',
+                        // Progression labels
+                        'exp-label': 'Exp:',
+                        'level-label': 'Level',
+                        'until-level-label': 'Until level',
+                        'until-level-20-label': 'Until level',
+                        'changes-title': 'Changes',
+                        // Buttons
+                        'add-proficiency-btn': 'Add proficiency',
+                        'add-exp-change-btn': 'New exp',
+                        'add-note-btn': 'New note',
+                        'effects-add-btn': 'Add Effect',
+                        // Right panel
+                        'qn-field': 'For statuses and important stuff',
+                        'inv-content': 'Items here... Very intuitive to use I.G.',
+                        // HP
+                        'hp-label': 'HP',
+                        'mastery-label': 'Mastery',
+                        'armor-class-label': 'Armor class:',
+                        'speed-label': 'Speed:',
+                        // Name
+                        'name-label': 'Name:',
+                        'base-value-label': 'base value:',
+                        'base-value-label-2': 'base value:',
+                        'base-value-label-3': 'Base value',
+                        // Effects
+                        'effects-title': 'Effects',
+                    },
+                    ru: {
+                        // Stats
+                        'stat-title-Str': 'Сил',
+                        'stat-title-Dex': 'Лов',
+                        'stat-title-Con': 'Тел',
+                        'stat-title-Int': 'Инт',
+                        'stat-title-Wis': 'Муд',
+                        'stat-title-Cha': 'Хар',
+                        // Skills
+                        'sk-label-Athletics': 'Атлетика',
+                        'sk-label-Acrobatics': 'Акробатика',
+                        'sk-label-Sleight_of_Hand': 'Ловкость рук',
+                        'sk-label-Stealth': 'Скрытность',
+                        'sk-label-Arcana': 'Магия',
+                        'sk-label-History': 'История',
+                        'sk-label-Investigation': 'Расследование',
+                        'sk-label-Nature': 'Природа',
+                        'sk-label-Religion': 'Религия',
+                        'sk-label-Animal_Handling': 'Уход за животными',
+                        'sk-label-Insight': 'Проницательность',
+                        'sk-label-Medicine': 'Медицина',
+                        'sk-label-Perception': 'Восприятие',
+                        'sk-label-Survival': 'Выживание',
+                        'sk-label-Deception': 'Обман',
+                        'sk-label-Intimidation': 'Запугивание',
+                        'sk-label-Performance': 'Выступление',
+                        'sk-label-Persuasion': 'Убеждение',
+                        // Skill abilities
+                        'sk-ability-Athletics': '(Сил)',
+                        'sk-ability-Acrobatics': '(Лов)',
+                        'sk-ability-Sleight_of_Hand': '(Лов)',
+                        'sk-ability-Stealth': '(Лов)',
+                        'sk-ability-Arcana': '(Инт)',
+                        'sk-ability-History': '(Инт)',
+                        'sk-ability-Investigation': '(Инт)',
+                        'sk-ability-Nature': '(Инт)',
+                        'sk-ability-Religion': '(Инт)',
+                        'sk-ability-Animal_Handling': '(Муд)',
+                        'sk-ability-Insight': '(Муд)',
+                        'sk-ability-Medicine': '(Муд)',
+                        'sk-ability-Perception': '(Муд)',
+                        'sk-ability-Survival': '(Муд)',
+                        'sk-ability-Deception': '(Хар)',
+                        'sk-ability-Intimidation': '(Хар)',
+                        'sk-ability-Performance': '(Хар)',
+                        'sk-ability-Persuasion': '(Хар)',
+                        // Skill tooltips
+                        'sk-tooltip-Athletics': 'Лазание, прыжки или плавание в сложных условиях.',
+                        'sk-tooltip-Acrobatics': 'Балансирование, кувырки или удержание на ногах.',
+                        'sk-tooltip-Sleight_of_Hand': 'Фокусы, карманные кражи или сокрытие предметов.',
+                        'sk-tooltip-Stealth': 'Скрытие и бесшумное передвижение мимо врагов.',
+                        'sk-tooltip-Arcana': 'Знания о заклинаниях, магических предметах и традициях.',
+                        'sk-tooltip-History': 'Воспоминания о событиях, правителях и древних царствах.',
+                        'sk-tooltip-Investigation': 'Выводы из улик, логический поиск и скрытые детали.',
+                        'sk-tooltip-Nature': 'Знания о местности, растениях, животных и погоде.',
+                        'sk-tooltip-Religion': 'Воспоминания о божествах, символах и обрядах.',
+                        'sk-tooltip-Animal_Handling': 'Успокоение или предсказание поведения животных.',
+                        'sk-tooltip-Insight': 'Чтение настроения, намерений или правдивости человека.',
+                        'sk-tooltip-Medicine': 'Стабилизация умирающих или диагностика болезней.',
+                        'sk-tooltip-Perception': 'Замечание, слышание или ощущение в окружении.',
+                        'sk-tooltip-Survival': 'Выслеживание, навигация и предсказание погоды.',
+                        'sk-tooltip-Deception': 'Убедительная ложь или введение в заблуждение.',
+                        'sk-tooltip-Intimidation': 'Угрозы или принуждение для достижения цели.',
+                        'sk-tooltip-Performance': 'Развлечение через актерство, музыку или танец.',
+                        'sk-tooltip-Persuasion': 'Влияние на людей через дипломатию и такт.',
+                        // Panel titles
+                        'abilities-title': 'Способности',
+                        'proficiency-title': 'Владение',
+                        'progression-title': 'Прогресс',
+                        'inventory-title': 'Инвентарь',
+                        'notes-title': 'Заметки',
+                        // Progression labels
+                        'exp-label': 'Опыт:',
+                        'level-label': 'Уровень',
+                        'until-level-label': 'До уровня',
+                        'until-level-20-label': 'До уровня',
+                        'changes-title': 'Изменения',
+                        // Buttons
+                        'add-proficiency-btn': 'Добавить владение',
+                        'add-exp-change-btn': 'Новый опыт',
+                        'add-note-btn': 'Новая заметка',
+                        'effects-add-btn': 'Добавить эффект',
+                        // Right panel
+                        'qn-field': 'Для статусов и важных вещей',
+                        'inv-content': 'Предметы здесь... Очень интуитивно понятно.',
+                        // HP
+                        'hp-label': 'Здоровье',
+                        'mastery-label': 'Мастерство',
+                        'armor-class-label': 'Класс доспеха:',
+                        'speed-label': 'Скорость:',
+                        // Name
+                        'name-label': 'Имя:',
+                        'base-value-label': 'база:',
+                        'base-value-label-2': 'база:',
+                        'base-value-label-3': 'База',
+                        // Effects
+                        'effects-title': 'Эффекты',
+                    }
+                };
+
+                function applyLanguage(lang) {
+                    currentLang = lang;
+                    const t = translations[lang];
+
+                    // Update all elements with data-i18n attribute or by ID
+                    for (const [key, value] of Object.entries(t)) {
+                        const el = document.getElementById(key);
+                        if (el) {
+                            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                                el.placeholder = value;
+                            } else {
+                                el.textContent = value;
+                            }
+                        }
+                    }
+
+                    // Update active state
+                    langEn.classList.toggle('active', lang === 'en');
+                    langRu.classList.toggle('active', lang === 'ru');
+                }
+
+                langEn.addEventListener('click', function() {
+                    if (currentLang !== 'en') applyLanguage('en');
+                });
+
+                langRu.addEventListener('click', function() {
+                    if (currentLang !== 'ru') applyLanguage('ru');
+                });
+
+                // Initial language
+                applyLanguage('en');
 
             })();
         </script>
@@ -3717,7 +4086,7 @@
             // SCRIPT 10: Effects list interactive logic
             // =============================================================
             const statEffectsList = document.getElementById('statEffects-list');
-            const statEffectsAddBtn = document.getElementById('statEffects-add-btn');
+            const statEffectsAddBtn = document.getElementById('effects-add-btn');
 
             function createStatEffectItem(sourceValue, selectedStat, valueValue) {
                 const item = document.createElement('div');
