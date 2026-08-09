@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Learner</title>
+        <meta charset="utf-16">
+    </head>
+    <body>
+        <div class="container">
+            <div class="sets">
+                <h1>Настройка</h1>
+                <textarea id="inp-txt" class="red-area"></textarea>
+                <div>
+                    <button class="down-btn" onclick="construct(); cstep = 0; display(cstep)">Go</button>
+                </div>
+            </div>
+            <div class="active">
+                <h1>Учим</h1>
+                <div id="part" class="part"></div>
+                <span class="step-board">
+                    <button class="down-btn" onclick="prev()">Пред</button>
+                    <label>Шаг: </label>
+                    <label id="step">-1</label>
+                    <button class="down-btn" onclick="next()">След</button>
+                </span>
+            </div>
+        </div>
+    </body>
+
+    <script id="main-script">
+        let abt = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+        let steps = []
+        let cstep = 0
+
+        function construct() {
+            steps = []
+            steps.push(document.getElementById("inp-txt").value)
+            for (let i = 0; i < 60; i++) {
+                let plt = steps[steps.length-1]
+                let nt = ""
+                for (let j = 0; j < plt.length; j++) {
+                    if (abt.includes(plt[j]) && Math.random() > 0.95) nt+="*";
+                    else nt+=plt[j]
+                }
+                steps.push(nt)
+            }
+        }
+
+        function display(step) {
+            document.getElementById("step").innerHTML = step.toString()
+            document.getElementById("part").innerText = steps[step]
+        }
+
+        function next() {
+            cstep++;
+            display(cstep);
+        }
+
+        function prev() {
+            cstep--;
+            display(cstep);
+        }
+    </script>
+
+    <style>
+        .container {
+            position: absolute;
+            left: 0%;
+            top: 0%;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sets {
+            position: absolute;
+            left: 50px;
+            width: 40%;
+            top: 30px;
+            bottom: 30px;
+            text-align: center;
+            border: solid black 5px;
+            overflow: hidden;
+        }
+
+        .active {
+            position: absolute;
+            right: 50px;
+            width: 40%;
+            top: 30px;
+            bottom: 30px;
+            text-align: center;
+            border: solid black 5px;
+            overflow: hidden;
+        }
+
+        .red-area {
+            width: 80%;
+            height: 550px;
+        }
+
+        .step-board {
+            position: absolute;
+            left: 50px;
+            right: 50px;
+            height: 80px;
+            bottom: 50px;
+
+            font-size: 50px;
+            align-content: center;
+        }
+
+        .down-btn {
+            width: 150px;
+            font-size: 30px;
+            height: 80%;
+        }
+
+        .part {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            top: 90px;
+            bottom: 170px;
+            border: solid 2px black;
+            border-radius: 15px;
+        }
+    </style>
+
+
+
+    <script id="init-script">
+        default_txt = `В семнадцать совсем уже были мы взрослые —
+Ведь нам подрастать на войне довелось…
+А нынче сменили нас девочки рослые
+Со взбитыми космами ярких волос.
+
+Красивые, черти! Мы были другими —
+Военной голодной поры малыши.
+Но парни, которые с нами дружили,
+Считали, как видно, что мы хороши.
+
+Любимые нас целовали в траншее,
+Любимые нам перед боем клялись.
+Чумазые, тощие, мы хорошели
+И верили: это на целую жизнь.
+
+Эх, только бы выжить!.. Вернулись немногие.
+И можно ли ставить любимым в вину,
+Что нравятся девочки им длинноногие,
+Которые только рождались в войну?
+
+И правда, как могут не нравиться весны,
+Цветение, первый полет каблучков,
+И даже сожженные краскою космы,
+Когда их хозяйкам семнадцать годков.
+
+А годы, как листья осенние, кружатся.
+И кажется часто, ровесницы, мне —
+В борьбе за любовь пригодится нам мужество
+Не меньше, чем на войне…
+`
+
+        document.getElementById("inp-txt").value = default_txt
+    </script>
+</html>
