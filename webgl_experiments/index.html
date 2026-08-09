@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>WebGL Red Square</title>
+        <style>
+            body {
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background: #1a1a2e;
+            }
+            canvas {
+                border: 2px solid #444;
+                background: #2a2a4e;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="400" height="400"></canvas>
+
+        <script src="gl_utils.js"></script>
+        <script>
+            const canvas = document.getElementById('canvas');
+            const gl = canvas.getContext('webgl');
+
+            if (!gl) {
+                alert('WebGL not supported!');
+                throw new Error('WebGL not supported');
+            }
+
+            // Vertex Shader - passes position through
+            const vertexShaderSource = `
+                attribute vec2 aPosition;
+                void main() {
+                    gl_Position = vec4(aPosition, 0.0, 1.0);
+                }
+            `;
+
+            // Fragment Shader - outputs red color
+            const fragmentShaderSource = `
+                precision mediump float;
+                void main() {
+                    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red
+                }
+            `;
+
+
+            const program = createProgram(vertexShaderSource, fragmentShaderSource);
+            if (!program) throw new Error('Failed to create program');
+
+            const vertices = new Float32Array([
+            // Triangle 1
+            -0.5, -0.5,  // Bottom-left
+             0.5, -0.5,  // Bottom-right
+             0.5,  0.5,  // Top-right
+            // Triangle 2
+            -0.5, -0.5,  // Bottom-left
+             0.5,  0.5,  // Top-right
+            -0.5,  0.5   // Top-left
+        ]);
+
+            // Create buffer and upload vertex data
+            const buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+
+            const aPosition = gl.getAttribLocation(program, 'aPosition');
+            gl.enableVertexAttribArray(aPosition);
+            gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+            
+
+            // Clear canvas with dark background
+            gl.clearColor(0.1, 0.1, 0.2, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            // Use our shader program
+            gl.useProgram(program);
+
+            // Draw 6 vertices as triangles (2 triangles = 1 square)
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            console.log('✅ Red square rendered!');
+        </script>
+    </body>
+</html>

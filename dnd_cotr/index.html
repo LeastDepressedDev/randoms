@@ -1,0 +1,4331 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title id="title-up">Dnd character constructor</title>
+        <style>
+            /* reset & base */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+            }
+
+            body {
+                background-color: #dce4ec;
+                min-height: 100vh;
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                padding-top: 60px;
+                overflow-x: hidden;
+            }
+
+            .holder {
+                width: 100%;
+                max-width: 1600px;
+                margin: 0 auto;
+                background-color: transparent;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                padding: 0 20px;
+                transition: margin-right 0.3s ease;
+            }
+
+            /* Full-width panels that should span both columns */
+            .holder .exp-panel.full-width {
+                grid-column: 1 / -1;
+            }
+
+            /* ---------- TOP BAR — fixed at top ---------- */
+            .top-bar {
+                background: #1e2b3c;
+                color: #f0f4fa;
+                padding: 0 20px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                flex-shrink: 0;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                gap: 4px;
+                border-radius: 0;
+                width: 100%;
+                margin-bottom: 0;
+            }
+
+            .top-bar .top-bar-left {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                flex: 1;
+            }
+
+            .top-bar .top-bar-right {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-shrink: 0;
+            }
+
+            /* Menu button (3 rows texture) */
+            .menu-btn {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 4px;
+                gap: 4px;
+                border-radius: 6px;
+                transition: 0.15s;
+            }
+
+            .menu-btn:hover {
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            .menu-btn .menu-line {
+                display: block;
+                width: 22px;
+                height: 2px;
+                background: #e8edf3;
+                border-radius: 2px;
+                transition: 0.2s;
+            }
+
+            .menu-btn.active .menu-line:nth-child(1) {
+                transform: rotate(45deg) translate(4px, 4px);
+            }
+
+            .menu-btn.active .menu-line:nth-child(2) {
+                opacity: 0;
+            }
+
+            .menu-btn.active .menu-line:nth-child(3) {
+                transform: rotate(-45deg) translate(4px, -4px);
+            }
+
+            .dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .dropbtn {
+                background: transparent;
+                color: #e8edf3;
+                padding: 4px 14px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                border: 1px solid transparent;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: 0.15s;
+                letter-spacing: 0.2px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                white-space: nowrap;
+                height: 30px;
+                line-height: 1;
+            }
+
+            .dropbtn:hover {
+                background: #2f4055;
+                border-color: #5b7a9a;
+                color: white;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .dropbtn::after {
+                content: " ▾";
+                font-size: 0.6rem;
+                opacity: 0.7;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                top: 34px;
+                left: 0;
+                min-width: 170px;
+                background: #233140;
+                border-radius: 10px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+                padding: 6px 0;
+                z-index: 100;
+                border: 1px solid #3d556b;
+            }
+
+            .dropdown-content a {
+                color: #eef3f9;
+                padding: 8px 18px;
+                text-decoration: none;
+                display: block;
+                font-size: 0.82rem;
+                transition: 0.1s;
+                border-left: 3px solid transparent;
+                font-weight: 400;
+                white-space: nowrap;
+                cursor: pointer;
+            }
+
+            .dropdown-content a:hover {
+                background: #2f425a;
+                border-left-color: #b8a07c;
+                color: white;
+            }
+
+            .dropdown.open .dropdown-content {
+                display: block;
+            }
+
+            .sep {
+                width: 1px;
+                height: 22px;
+                background: #3d556b;
+                margin: 0 8px 0 4px;
+                opacity: 0.5;
+                flex-shrink: 0;
+            }
+
+            /* ============================================================
+               RIGHT PANEL — 5% larger
+               ============================================================ */
+            .right-panel-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.3);
+                z-index: 998;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+
+            .right-panel-overlay.visible {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .right-panel {
+                position: fixed;
+                top: 40px;
+                right: -450px;
+                width: 420px;
+                max-width: 100vw;
+                height: calc(100vh - 40px);
+                background: #1e2b3c;
+                color: #f0f4fa;
+                z-index: 999;
+                transition: right 0.3s ease;
+                box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .right-panel.open {
+                right: 0;
+            }
+
+            .right-panel-header {
+                padding: 16px 20px;
+                border-bottom: 1px solid #3d556b;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-shrink: 0;
+            }
+
+            .right-panel-header h2 {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #f0f4fa;
+                letter-spacing: 0.3px;
+            }
+
+            .right-panel-close-btn {
+                background: transparent;
+                border: none;
+                color: #8aa5c0;
+                font-size: 1.4rem;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 6px;
+                transition: 0.15s;
+                line-height: 1;
+            }
+
+            .right-panel-close-btn:hover {
+                color: #ff6b6b;
+                background: rgba(255, 80, 80, 0.1);
+            }
+
+            .right-panel-body {
+                flex: 1;
+                padding: 20px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            /* Right panel sub-panels */
+            .rp-subpanel {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 16px;
+                border: 1px solid #3d556b;
+                padding: 16px 18px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .rp-subpanel-title-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border-bottom: 1px solid #3d556b;
+                padding-bottom: 8px;
+            }
+
+            .rp-subpanel-title {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #b0c8dd;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+
+            .rp-subpanel .rp-textarea {
+                width: 100%;
+                min-height: 120px;
+                padding: 10px 12px;
+                font-size: 0.9rem;
+                font-family: inherit;
+                color: #e8edf3;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid #3d556b;
+                border-radius: 10px;
+                outline: none;
+                transition: 0.15s;
+                resize: vertical;
+                line-height: 1.6;
+            }
+
+            .rp-subpanel .rp-textarea:focus {
+                border-color: #5b7a9a;
+                box-shadow: 0 0 0 3px rgba(91, 122, 154, 0.15);
+            }
+
+            .rp-subpanel .rp-textarea::placeholder {
+                color: #5a7a8a;
+                font-weight: 300;
+            }
+
+            /* Info sign with tooltip for subpanel title */
+            .rp-info-sign {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.08);
+                color: #6a8aa5;
+                font-size: 0.7rem;
+                font-weight: 700;
+                cursor: help;
+                position: relative;
+                transition: 0.15s;
+                user-select: none;
+                flex-shrink: 0;
+                border: 1px solid #3d556b;
+            }
+
+            .rp-info-sign:hover {
+                background: rgba(255, 255, 255, 0.15);
+                color: #b0c8dd;
+                transform: scale(1.05);
+            }
+
+            .rp-info-sign .rp-tooltip {
+                visibility: hidden;
+                opacity: 0;
+                position: absolute;
+                bottom: calc(100% + 10px);
+                left: 50%;
+                transform: translateX(-50%);
+                background: #1e2b3c;
+                color: #f0f4fa;
+                padding: 10px 16px;
+                border-radius: 10px;
+                font-size: 0.8rem;
+                font-weight: 400;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                z-index: 200;
+                transition: opacity 0.2s ease, visibility 0.2s ease;
+                line-height: 1.5;
+                text-align: center;
+                max-width: 560px;
+                min-width: 400px;
+                border: 1px solid #3d556b;
+                pointer-events: none;
+                white-space: normal;
+            }
+
+            .rp-info-sign .rp-tooltip::before {
+                content: '';
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                border: 6px solid transparent;
+                border-top-color: #1e2b3c;
+            }
+
+            .rp-info-sign:hover .rp-tooltip {
+                visibility: visible;
+                opacity: 1;
+            }
+
+            /* ============================================================
+               PRECALCULATION LIST
+               ============================================================ */
+            .rp-calc-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+
+            .rp-calc-item {
+                background: rgba(255, 255, 255, 0.04);
+                border-radius: 12px;
+                border: 1px solid #2a3a4a;
+                padding: 10px 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                transition: 0.15s;
+                min-height: 60px;
+            }
+
+            .rp-calc-item:hover {
+                border-color: #4a6a8a;
+                background: rgba(255, 255, 255, 0.06);
+            }
+
+            .rp-calc-item .calc-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+                flex-wrap: nowrap;
+            }
+
+            .rp-calc-item .calc-row .calc-input {
+                flex: 1;
+                min-width: 0;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #2a3a4a;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.85rem;
+                color: #e8edf3;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+                font-family: inherit;
+            }
+
+            .rp-calc-item .calc-row .calc-input:focus {
+                border-bottom-color: #5b7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .rp-calc-item .calc-row .calc-input::placeholder {
+                color: #4a6a7a;
+                font-weight: 300;
+            }
+
+            .rp-calc-item .calc-row .calc-btn {
+                background: transparent;
+                border: none;
+                color: #6a8aa5;
+                font-size: 0.8rem;
+                cursor: pointer;
+                padding: 4px 10px;
+                border-radius: 6px;
+                transition: 0.15s;
+                font-weight: 500;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .rp-calc-item .calc-row .calc-btn:hover {
+                background: rgba(255, 255, 255, 0.08);
+                color: #f0f4fa;
+            }
+
+            .rp-calc-item .calc-row .calc-btn-delete {
+                color: #6a6a7a;
+                font-size: 1.1rem;
+                padding: 4px 6px;
+            }
+
+            .rp-calc-item .calc-row .calc-btn-delete:hover {
+                color: #ff6b6b;
+                background: rgba(255, 80, 80, 0.1);
+            }
+
+            .rp-calc-item .calc-row .calc-btn-send {
+                color: #6a8aa5;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid #3d556b;
+                border-radius: 8px;
+                padding: 4px 14px;
+                font-size: 0.75rem;
+                font-weight: 700;
+            }
+
+            .rp-calc-item .calc-row .calc-btn-send:hover {
+                background: rgba(91, 122, 154, 0.2);
+                border-color: #5b7a9a;
+                color: #f0f4fa;
+            }
+
+            /* Description textarea — hidden by default, shown on hover */
+            .rp-calc-item .calc-description {
+                width: 100%;
+                min-height: 0;
+                max-height: 0;
+                padding: 0 10px;
+                margin: 0;
+                border: none;
+                overflow: hidden;
+                opacity: 0;
+                font-size: 0.8rem;
+                font-family: inherit;
+                color: #b0c8dd;
+                background: rgba(255, 255, 255, 0.03);
+                border-radius: 8px;
+                outline: none;
+                resize: vertical;
+                line-height: 1.5;
+                transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease, margin 0.3s ease, border 0.3s ease, min-height 0.3s ease;
+                box-sizing: border-box;
+            }
+
+            .rp-calc-item:hover .calc-description {
+                max-height: 120px;
+                min-height: 60px;
+                padding: 8px 10px;
+                margin-top: 4px;
+                border: 1px solid #2a3a4a;
+                opacity: 1;
+            }
+
+            .rp-calc-item .calc-description:focus {
+                border-color: #5b7a9a;
+            }
+
+            .rp-calc-item .calc-description::placeholder {
+                color: #4a6a7a;
+                font-weight: 300;
+            }
+
+            .rp-calc-add-btn {
+                background: #2a4055;
+                color: #e8edf3;
+                border: none;
+                padding: 6px 16px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                cursor: pointer;
+                transition: 0.15s;
+                font-weight: 500;
+                align-self: flex-start;
+                letter-spacing: 0.2px;
+            }
+
+            .rp-calc-add-btn:hover {
+                background: #3a5a7a;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                transform: scale(1.02);
+            }
+
+            /* ============================================================
+               EXPANDABLE PANEL — round borders, vertically expandable
+               ============================================================ */
+            .exp-panel {
+                background: #f5f9ff;
+                border-radius: 28px;
+                border: 1px solid #c8d8e8;
+                box-shadow: 0 6px 20px rgba(0, 20, 30, 0.08);
+                padding: 24px 28px;
+                width: 100%;
+                min-height: 120px;
+                height: auto;
+                transition: min-height 0.2s ease;
+                display: flex;
+                flex-direction: column;
+                background-image: radial-gradient(circle at 20% 30%, rgba(200, 220, 240, 0.2) 0%, transparent 60%);
+            }
+
+            .exp-panel .panel-content {
+                flex: 1;
+                color: #1e2b3c;
+            }
+
+            /* Panel title */
+            .panel-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #1e3347;
+                margin-bottom: 18px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #d0dfee;
+                letter-spacing: 0.3px;
+            }
+
+            /* Name row — label + editable field (underline only) */
+            .name-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 24px;
+                padding-bottom: 14px;
+                border-bottom: 2px solid #d0dfee;
+                flex-wrap: wrap;
+            }
+
+            .name-label {
+                font-size: 1.1rem;
+                font-weight: 500;
+                color: #1e3347;
+                white-space: nowrap;
+            }
+
+            .name-input {
+                flex: 1;
+                min-width: 200px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #b0c8dd;
+                padding: 4px 4px 6px 4px;
+                font-size: 1.1rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                font-weight: 400;
+                border-radius: 0;
+            }
+
+            .name-input:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            /* ============================================================
+               HP SUBCATEGORY — big bordered round box
+               ============================================================ */
+            .hp-subcategory {
+                border: 2px solid #c8d8e8;
+                border-radius: 24px;
+                padding: 16px 24px;
+                margin-bottom: 16px;
+                background: rgba(255, 255, 255, 0.3);
+                box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.02);
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                min-height: 60px;
+            }
+
+            /* Stat line styles (HP, Mastery, AC, Speed) — all consistent */
+            .stat-line {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 6px 12px;
+                position: relative;
+                border-radius: 12px;
+                border: 2px solid transparent;
+                transition: border-color 0.25s ease, background-color 0.25s ease;
+                margin: 0 -4px;
+            }
+
+            .stat-line:hover {
+                border-color: #9ab0c8;
+                background-color: rgba(255, 255, 255, 0.4);
+            }
+
+            .stat-line-left {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .stat-line-label {
+                font-size: 1.1rem;
+                font-weight: 500;
+                color: #1e3347;
+                cursor: default;
+            }
+
+            .stat-line-value {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #1e3347;
+                background: #eef4fa;
+                padding: 2px 16px;
+                border-radius: 8px;
+                min-width: 40px;
+                text-align: center;
+                display: inline-block;
+            }
+
+            /* HP input fields */
+            .stat-line-hp .stat-line-hp-input {
+                width: 50px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #b0c8dd;
+                padding: 2px 4px 4px 4px;
+                font-size: 1.6rem;
+                font-weight: 700;
+                color: #1e3347;
+                outline: none;
+                transition: 0.15s;
+                text-align: center;
+                border-radius: 0;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .stat-line-hp .stat-line-hp-input:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .stat-line-hp .stat-line-hp-input::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+                font-size: 1rem;
+            }
+
+            /* Base value input — hidden by default, shown on hover */
+            .stat-base-wrapper {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                opacity: 0;
+                max-width: 0;
+                overflow: hidden;
+                transition: opacity 0.25s ease, max-width 0.3s ease, margin-left 0.3s ease;
+                margin-left: 0;
+                pointer-events: none;
+            }
+
+            .stat-line:hover .stat-base-wrapper {
+                opacity: 1;
+                max-width: 200px;
+                margin-left: 8px;
+                pointer-events: auto;
+            }
+
+            .stat-base-label-small {
+                font-size: 0.85rem;
+                font-weight: 400;
+                color: #6a8aa5;
+                white-space: nowrap;
+            }
+
+            .stat-base-input-small {
+                width: 60px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #b0c8dd;
+                padding: 2px 4px 4px 4px;
+                font-size: 0.9rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                font-weight: 500;
+                text-align: center;
+                border-radius: 0;
+            }
+
+            .stat-base-input-small:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .stat-base-input-small::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+                font-size: 0.75rem;
+            }
+
+            /* Special styling for HP — bigger font */
+            .stat-line-hp .stat-line-label {
+                font-size: 1.8rem;
+                font-weight: 700;
+            }
+
+            .stat-line-hp .stat-line-separator {
+                font-size: 1.8rem;
+                font-weight: 300;
+                color: #b0c4d8;
+                margin: 0 2px;
+            }
+
+            /* ============================================================
+               STATS HEADER — info sign with tooltip
+               ============================================================ */
+            .stats-header {
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                margin-bottom: 8px;
+                padding-right: 4px;
+            }
+
+            .info-sign {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: #d0dfee;
+                color: #1e3347;
+                font-size: 0.85rem;
+                font-weight: 700;
+                cursor: help;
+                position: relative;
+                transition: 0.15s;
+                user-select: none;
+                z-index: 60;
+            }
+
+            .info-sign:hover {
+                background: #b0c8dd;
+                transform: scale(1.05);
+            }
+
+            .info-sign .tooltip {
+                visibility: hidden;
+                opacity: 0;
+                position: absolute;
+                top: calc(100% + 10px);
+                right: 0;
+                background: #1e2b3c;
+                color: #f0f4fa;
+                padding: 12px 16px;
+                border-radius: 10px;
+                font-size: 0.85rem;
+                font-weight: 400;
+                white-space: nowrap;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                z-index: 200;
+                transition: opacity 0.2s ease, visibility 0.2s ease;
+                line-height: 1.6;
+                text-align: left;
+                min-width: 200px;
+                border: 1px solid #3d556b;
+                pointer-events: none;
+            }
+
+            .info-sign .tooltip::before {
+                content: '';
+                position: absolute;
+                bottom: 100%;
+                right: 10px;
+                border: 6px solid transparent;
+                border-bottom-color: #1e2b3c;
+            }
+
+            .info-sign:hover .tooltip {
+                visibility: visible;
+                opacity: 1;
+            }
+
+            .info-sign .tooltip .tooltip-line {
+                display: block;
+                padding: 2px 0;
+            }
+
+            .info-sign .tooltip .tooltip-line:not(:last-child) {
+                border-bottom: 1px solid #3d556b;
+                padding-bottom: 6px;
+                margin-bottom: 6px;
+            }
+
+            /* ============================================================
+               STATS ROW — 6 boxes
+               ============================================================ */
+            .stats-row {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 14px;
+                margin-top: 6px;
+                align-items: start;
+                position: relative;
+                z-index: 1;
+            }
+
+            .stat-box {
+                background: white;
+                border-radius: 16px;
+                border: 2px solid #d0dfee;
+                padding: 14px 8px 12px;
+                text-align: center;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+                transition: 0.15s;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 0;
+                position: relative;
+                align-self: stretch;
+                z-index: 1;
+            }
+
+            .stat-box:hover {
+                border-color: #9ab0c8;
+                box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+                transform: translateY(-2px);
+            }
+
+            .stat-title {
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                color: #4a6a85;
+                margin-bottom: 4px;
+                transition: color 0.2s ease;
+            }
+
+            .stat-value {
+                font-size: 2.6rem;
+                font-weight: 700;
+                color: #1e2b3c;
+                line-height: 1.1;
+                margin: 2px 0;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .stat-bonus {
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: #6a8aa5;
+                margin-top: 2px;
+                background: #eef4fa;
+                padding: 2px 14px;
+                border-radius: 30px;
+                display: inline-block;
+                font-variant-numeric: tabular-nums;
+            }
+
+            /* Editable field under each stat box — hidden by default */
+            .stat-base-row {
+                margin-top: 0px;
+                padding-top: 0px;
+                border-top: none;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                opacity: 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: opacity 0.25s ease, max-height 0.3s ease, margin-top 0.3s ease, padding-top 0.3s ease, border-top 0.3s ease;
+                pointer-events: none;
+            }
+
+            /* When ANY stat-box in the row is hovered, show ALL stat-base-rows */
+            .stats-row:hover .stat-base-row {
+                opacity: 1;
+                max-height: 80px;
+                pointer-events: auto;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid #e0eaf3;
+            }
+
+            .stat-base-input {
+                width: 80%;
+                max-width: 80px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #b0c8dd;
+                padding: 2px 4px 4px 4px;
+                font-size: 0.9rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                font-weight: 500;
+                text-align: center;
+                border-radius: 0;
+            }
+
+            .stat-base-input:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .stat-base-input::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+                font-size: 0.8rem;
+            }
+
+            .stat-base-label {
+                font-size: 0.65rem;
+                font-weight: 500;
+                color: #6a8aa5;
+                letter-spacing: 0.3px;
+                text-transform: uppercase;
+            }
+
+            /* Stat sub-box with saving throw value and checkbox */
+            .stat-sub-box {
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid #e0eaf3;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .stat-sub-value {
+                font-size: 1rem;
+                font-weight: 600;
+                color: #4a6a85;
+                background: #eef4fa;
+                padding: 2px 16px;
+                border-radius: 8px;
+                min-width: 30px;
+                text-align: center;
+                display: inline-block;
+            }
+
+            /* Round checkbox styling */
+            .stat-checkbox {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                border: 2px solid #b0c8dd;
+                background: white;
+                cursor: pointer;
+                transition: 0.15s;
+                flex-shrink: 0;
+                position: relative;
+                outline: none;
+            }
+
+            .stat-checkbox:checked {
+                background: #4a7a9a;
+                border-color: #4a7a9a;
+            }
+
+            .stat-checkbox:checked::after {
+                content: '✓';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            .stat-checkbox:hover {
+                border-color: #4a7a9a;
+            }
+
+            /* ============================================================
+               EFFECTS SUBSECTION
+               ============================================================ */
+            .effects-subtitle {
+                font-size: 1.05rem;
+                font-weight: 600;
+                color: #1e3347;
+                margin-top: 18px;
+                padding-top: 14px;
+                border-top: 2px solid #d0dfee;
+                margin-bottom: 10px;
+                transition: color 0.2s ease;
+            }
+
+            .effects-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .stat-effects-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: white;
+                padding: 8px 12px;
+                border-radius: 12px;
+                border: 1px solid #dce6f0;
+                transition: 0.15s;
+            }
+
+            .stat-effects-item:hover {
+                border-color: #b0c8dd;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+
+            .stat-effects-source {
+                flex: 1;
+                min-width: 100px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #d0dfee;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.95rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+            }
+
+            .stat-effects-source:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .stat-effects-source::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+            }
+
+            .stat-effects-select {
+                flex: 1.2;
+                min-width: 100px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #d0dfee;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.95rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+                cursor: pointer;
+                appearance: none;
+                -webkit-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236a8aa5' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 4px center;
+                padding-right: 24px;
+            }
+
+            .stat-effects-select:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .stat-effects-select option {
+                background: #233140;
+                color: #f0f4fa;
+            }
+
+            .stat-effects-value {
+                flex: 1;
+                min-width: 80px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #d0dfee;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.95rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+            }
+
+            .stat-effects-value:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .stat-effects-value::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+            }
+
+            .stat-effects-remove-btn {
+                background: transparent;
+                border: none;
+                color: #b0c4d8;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: 0.15s;
+                line-height: 1;
+                flex-shrink: 0;
+            }
+
+            .stat-effects-remove-btn:hover {
+                color: #d34a4a;
+                background: #fff0f0;
+            }
+
+            .effects-add-btn {
+                background: #1e2b3c;
+                color: #f0f4fa;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 30px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: 0.15s;
+                font-weight: 500;
+                align-self: flex-start;
+                letter-spacing: 0.3px;
+            }
+
+            .effects-add-btn:hover {
+                background: #2f4055;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: scale(1.02);
+            }
+
+            /* ============================================================
+               ABILITIES PANEL — skill list
+               ============================================================ */
+            .skill-line {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: background-color 0.15s;
+                position: relative;
+                cursor: default;
+            }
+
+            .skill-line:hover {
+                background-color: rgba(200, 215, 235, 0.3);
+            }
+
+            .skill-line-left {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                flex-wrap: wrap;
+            }
+
+            .skill-label {
+                font-size: 0.95rem;
+                font-weight: 400;
+                color: #1e3347;
+                transition: color 0.2s ease;
+            }
+
+            .skill-ability {
+                font-size: 0.8rem;
+                font-weight: 500;
+                color: #6a8aa5;
+                background: #eef4fa;
+                padding: 0px 8px;
+                border-radius: 4px;
+                font-style: italic;
+                transition: color 0.2s ease;
+            }
+
+            .skill-value {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: #1e3347;
+                background: #eef4fa;
+                padding: 2px 14px;
+                border-radius: 8px;
+                min-width: 30px;
+                text-align: center;
+                display: inline-block;
+            }
+
+            /* Tooltip for skills */
+            .skill-line .skill-tooltip {
+                visibility: hidden;
+                opacity: 0;
+                position: absolute;
+                bottom: calc(100% + 10px);
+                left: 50%;
+                transform: translateX(-50%);
+                background: #1e2b3c;
+                color: #f0f4fa;
+                padding: 8px 14px;
+                border-radius: 10px;
+                font-size: 0.8rem;
+                font-weight: 400;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                z-index: 200;
+                transition: opacity 0.2s ease, visibility 0.2s ease;
+                line-height: 1.5;
+                text-align: center;
+                max-width: 320px;
+                border: 1px solid #3d556b;
+                pointer-events: none;
+                white-space: normal;
+            }
+
+            .skill-line .skill-tooltip::before {
+                content: '';
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                border: 6px solid transparent;
+                border-top-color: #1e2b3c;
+            }
+
+            .skill-line:hover .skill-tooltip {
+                visibility: visible;
+                opacity: 1;
+            }
+
+            /* ============================================================
+               PROFICIENCY SUBSECTION
+               ============================================================ */
+            .proficiency-subtitle {
+                font-size: 1.05rem;
+                font-weight: 600;
+                color: #1e3347;
+                margin-top: 18px;
+                padding-top: 14px;
+                border-top: 2px solid #d0dfee;
+                margin-bottom: 10px;
+                transition: color 0.2s ease;
+            }
+
+            .proficiency-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .proficiency-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: white;
+                padding: 8px 12px;
+                border-radius: 12px;
+                border: 1px solid #dce6f0;
+                transition: 0.15s;
+            }
+
+            .proficiency-item:hover {
+                border-color: #b0c8dd;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+
+            .proficiency-source {
+                flex: 1;
+                min-width: 100px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #d0dfee;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.95rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+            }
+
+            .proficiency-source:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .proficiency-source::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+            }
+
+            .proficiency-select {
+                flex: 1.5;
+                min-width: 140px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #d0dfee;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.95rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+                cursor: pointer;
+                appearance: none;
+                -webkit-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236a8aa5' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 4px center;
+                padding-right: 24px;
+            }
+
+            .proficiency-select:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .proficiency-select option {
+                background: #233140;
+                color: #f0f4fa;
+            }
+
+            .proficiency-remove-btn {
+                background: transparent;
+                border: none;
+                color: #b0c4d8;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: 0.15s;
+                line-height: 1;
+                flex-shrink: 0;
+            }
+
+            .proficiency-remove-btn:hover {
+                color: #d34a4a;
+                background: #fff0f0;
+            }
+
+            .proficiency-add-btn {
+                background: #1e2b3c;
+                color: #f0f4fa;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 30px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: 0.15s;
+                font-weight: 500;
+                align-self: flex-start;
+                letter-spacing: 0.3px;
+                transition: color 0.2s ease;
+            }
+
+            .proficiency-add-btn:hover {
+                background: #2f4055;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: scale(1.02);
+            }
+
+            /* ============================================================
+               PROGRESSION PANEL — body format (fixed for mobile)
+               ============================================================ */
+            .progression-row {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                flex-wrap: nowrap;
+                padding: 4px 0;
+            }
+
+            .progression-label {
+                font-size: 1.05rem;
+                font-weight: 500;
+                color: #1e3347;
+                white-space: nowrap;
+                transition: color 0.2s ease;
+            }
+
+            .progression-value {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #1e2b3c;
+                background: #eef4fa;
+                padding: 2px 12px;
+                border-radius: 8px;
+                min-width: 30px;
+                text-align: center;
+                display: inline-block;
+                white-space: nowrap;
+            }
+
+            .progression-level-group {
+                display: flex;
+                align-items: center;
+                gap: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .progression-level-label {
+                font-size: 1.05rem;
+                font-weight: 500;
+                color: #1e3347;
+                white-space: nowrap;
+                transition: color 0.2s ease;
+            }
+
+            .progression-level-value {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #1e2b3c;
+                background: #eef4fa;
+                padding: 2px 8px 2px 8px;
+                border-radius: 8px;
+                min-width: 30px;
+                text-align: center;
+                display: inline-block;
+                margin: 0 0px;
+                white-space: nowrap;
+            }
+
+            .progression-level-paren {
+                font-size: 1.05rem;
+                font-weight: 500;
+                color: #1e3347;
+                white-space: nowrap;
+            }
+
+            /* Line 2 & 3 specific styles */
+            .progression-next-level {
+                font-size: 1.05rem;
+                font-weight: 500;
+                color: #1e3347;
+                white-space: nowrap;
+                transition: color 0.2s ease;
+            }
+
+            .progression-next-level-value {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #1e2b3c;
+                background: #eef4fa;
+                padding: 2px 12px;
+                border-radius: 8px;
+                min-width: 30px;
+                text-align: center;
+                display: inline-block;
+                white-space: nowrap;
+            }
+
+            .progression-next-level-exp {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #1e2b3c;
+                background: #eef4fa;
+                padding: 2px 12px;
+                border-radius: 8px;
+                min-width: 30px;
+                text-align: center;
+                display: inline-block;
+                white-space: nowrap;
+            }
+
+            .progression-separator {
+                font-size: 1.05rem;
+                font-weight: 500;
+                color: #1e3347;
+                white-space: nowrap;
+            }
+
+            /* ============================================================
+               CHANGES LIST
+               ============================================================ */
+            .changes-subtitle {
+                font-size: 1.05rem;
+                font-weight: 600;
+                color: #1e3347;
+                margin-top: 12px;
+                padding-top: 12px;
+                border-top: 2px solid #d0dfee;
+                margin-bottom: 10px;
+                transition: color 0.2s ease;
+            }
+
+            .exp-changes-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .exp-change-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                background: white;
+                padding: 8px 12px;
+                border-radius: 12px;
+                border: 1px solid #dce6f0;
+                transition: 0.15s;
+            }
+
+            .exp-change-item:hover {
+                border-color: #b0c8dd;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+
+            .exp-change-source {
+                flex: 1;
+                min-width: 120px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #d0dfee;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.95rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+            }
+
+            .exp-change-source:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .exp-change-source::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+            }
+
+            .change-value {
+                flex: 1;
+                min-width: 80px;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #d0dfee;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.95rem;
+                color: #1e2b3c;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+            }
+
+            .change-value:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .change-value::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+            }
+
+            .change-remove-btn {
+                background: transparent;
+                border: none;
+                color: #b0c4d8;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: 0.15s;
+                line-height: 1;
+                flex-shrink: 0;
+            }
+
+            .change-remove-btn:hover {
+                color: #d34a4a;
+                background: #fff0f0;
+            }
+
+            .change-add-btn {
+                background: #1e2b3c;
+                color: #f0f4fa;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 30px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: 0.15s;
+                font-weight: 500;
+                align-self: flex-start;
+                letter-spacing: 0.3px;
+                transition: color 0.2s ease;
+            }
+
+            .change-add-btn:hover {
+                background: #2f4055;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: scale(1.02);
+            }
+
+            /* ============================================================
+               INVENTORY PANEL — scalable editable textfield
+               ============================================================ */
+            .inventory-textarea {
+                width: 100%;
+                min-height: 150px;
+                padding: 14px 18px;
+                font-size: 0.95rem;
+                font-family: inherit;
+                color: #1e2b3c;
+                background: white;
+                border: 2px solid #c8d8e8;
+                border-radius: 16px;
+                outline: none;
+                transition: 0.15s;
+                resize: vertical;
+                line-height: 1.6;
+            }
+
+            .inventory-textarea:focus {
+                border-color: #4a7a9a;
+                box-shadow: 0 0 0 3px rgba(74, 122, 154, 0.1);
+            }
+
+            .inventory-textarea::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+            }
+
+            /* ============================================================
+               NOTES IN TEXT PANEL
+               ============================================================ */
+            .notes-container {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .notes-add-btn {
+                background: #1e2b3c;
+                color: #f0f4fa;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 30px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: 0.15s;
+                font-weight: 500;
+                align-self: flex-start;
+                letter-spacing: 0.3px;
+                margin-bottom: 4px;
+                transition: color 0.2s ease;
+            }
+
+            .notes-add-btn:hover {
+                background: #2f4055;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: scale(1.02);
+            }
+
+            .note-item {
+                background: white;
+                border-radius: 16px;
+                border: 1px solid #dce6f0;
+                padding: 16px 18px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                transition: 0.15s;
+            }
+
+            .note-item:hover {
+                border-color: #b0c8dd;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+
+            .note-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .note-title-input {
+                flex: 1;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #d0dfee;
+                padding: 4px 4px 6px 4px;
+                font-size: 1.05rem;
+                font-weight: 600;
+                color: #1e3347;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+            }
+
+            .note-title-input:focus {
+                border-bottom-color: #4a7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .note-title-input::placeholder {
+                color: #b0c4d8;
+                font-weight: 400;
+            }
+
+            .note-remove-btn {
+                background: transparent;
+                border: none;
+                color: #b0c4d8;
+                font-size: 1.2rem;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 8px;
+                transition: 0.15s;
+                line-height: 1;
+                flex-shrink: 0;
+            }
+
+            .note-remove-btn:hover {
+                color: #d34a4a;
+                background: #fff0f0;
+            }
+
+            .note-body-textarea {
+                width: 100%;
+                min-height: 100px;
+                padding: 10px 12px;
+                font-size: 0.95rem;
+                font-family: inherit;
+                color: #1e2b3c;
+                background: #f8faff;
+                border: 2px solid #e0eaf3;
+                border-radius: 12px;
+                outline: none;
+                transition: 0.15s;
+                resize: vertical;
+                line-height: 1.6;
+            }
+
+            .note-body-textarea:focus {
+                border-color: #4a7a9a;
+                box-shadow: 0 0 0 3px rgba(74, 122, 154, 0.08);
+            }
+
+            .note-body-textarea::placeholder {
+                color: #b0c4d8;
+                font-weight: 300;
+            }
+
+            /* ============================================================
+               BOTTOM-RIGHT CLUSTER — Language switch + Info button
+               ============================================================ */
+            .bottom-cluster {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 999;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            /* Language switch */
+            .lang-switch {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                background: #1e2b3c;
+                padding: 4px 12px;
+                border-radius: 30px;
+                border: 2px solid #3d556b;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+                user-select: none;
+                height: 40px;
+            }
+
+            .lang-switch label {
+                color: #8aa5c0;
+                font-size: 0.7rem;
+                font-weight: 500;
+                letter-spacing: 0.3px;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: 0.15s;
+                padding: 2px 6px;
+                border-radius: 4px;
+            }
+
+            .lang-switch label.active {
+                color: #f0f4fa;
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .lang-switch label:hover {
+                color: #f0f4fa;
+            }
+
+            .lang-switch .lang-separator {
+                color: #3d556b;
+                font-size: 0.8rem;
+            }
+
+            /* Page info button */
+            .page-info {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+
+            .page-info-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: #1e2b3c;
+                color: #f0f4fa;
+                font-size: 1.2rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: 0.2s;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+                user-select: none;
+                border: 2px solid #3d556b;
+                z-index: 1000;
+                flex-shrink: 0;
+            }
+
+            .page-info-btn:hover {
+                background: #2f4055;
+                transform: scale(1.05);
+                border-color: #5b7a9a;
+            }
+
+            .page-info-box {
+                visibility: hidden;
+                opacity: 0;
+                position: absolute;
+                bottom: calc(100% + 12px);
+                right: 0;
+                background: #1e2b3c;
+                color: #f0f4fa;
+                padding: 16px 20px;
+                border-radius: 14px;
+                font-size: 0.9rem;
+                line-height: 1.8;
+                min-width: 280px;
+                max-width: 360px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+                border: 1px solid #3d556b;
+                transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+                transform: translateY(8px);
+                pointer-events: none;
+                z-index: 1000;
+            }
+
+            .page-info-box.visible {
+                visibility: visible;
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .page-info-box .info-title {
+                font-weight: 600;
+                font-size: 1rem;
+                color: #b8a07c;
+                margin-bottom: 6px;
+                display: block;
+                border-bottom: 1px solid #3d556b;
+                padding-bottom: 6px;
+            }
+
+            .page-info-box .info-author {
+                display: block;
+                padding: 2px 0;
+            }
+
+            .page-info-box .info-author a {
+                color: #8ab8d8;
+                text-decoration: none;
+                transition: 0.15s;
+            }
+
+            .page-info-box .info-author a:hover {
+                color: #b8d8f0;
+                text-decoration: underline;
+            }
+
+            .page-info-box .info-label {
+                color: #8aa5c0;
+                font-size: 0.8rem;
+            }
+
+            /* ============================================================
+               CONSOLE WINDOW — draggable
+               ============================================================ */
+            .console-window {
+                position: fixed;
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 560px;
+                max-width: 90vw;
+                background: #1e2b3c;
+                border-radius: 14px;
+                border: 2px solid #3d556b;
+                box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+                z-index: 2000;
+                display: flex;
+                flex-direction: column;
+                user-select: none;
+                min-height: 320px;
+                max-height: 80vh;
+                overflow: hidden;
+                resize: both;
+            }
+
+            .console-window .console-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 14px;
+                background: #2a3a4a;
+                border-bottom: 1px solid #3d556b;
+                cursor: grab;
+                flex-shrink: 0;
+            }
+
+            .console-window .console-header:active {
+                cursor: grabbing;
+            }
+
+            .console-window .console-header-title {
+                color: #a0b8d0;
+                font-size: 0.8rem;
+                font-weight: 400;
+                letter-spacing: 0.3px;
+            }
+
+            .console-window .console-header-right {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .console-window .console-header-right .console-btn {
+                background: transparent;
+                border: none;
+                color: #e8edf3;
+                font-size: 0.8rem;
+                font-weight: 500;
+                padding: 4px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: 0.15s;
+            }
+
+            .console-window .console-header-right .console-btn:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .console-window .console-header-right .console-btn-clear:hover {
+                background: rgba(255, 200, 50, 0.15);
+                color: #f0d060;
+            }
+
+            .console-window .console-header-right .console-btn-close:hover {
+                background: rgba(255, 80, 80, 0.2);
+                color: #ff6b6b;
+            }
+
+            .console-window .console-body {
+                flex: 1;
+                padding: 12px 14px;
+                overflow-y: auto;
+                background: #0f1a24;
+                min-height: 200px;
+                max-height: 400px;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 0.85rem;
+                color: #c8d8e8;
+                line-height: 1.5;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+
+            .console-window .console-body .console-output-line {
+                padding: 2px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            }
+
+            .console-window .console-body .console-output-line:last-child {
+                border-bottom: none;
+            }
+
+            .console-window .console-body .console-prompt {
+                color: #7ab8a0;
+            }
+
+            .console-window .console-body .console-error {
+                color: #ff6b6b;
+            }
+
+            .console-window .console-body .console-success {
+                color: #7bc87b;
+            }
+
+            .console-window .console-footer {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px 14px;
+                background: #1e2b3c;
+                border-top: 1px solid #2a3a4a;
+                flex-shrink: 0;
+            }
+
+            .console-window .console-footer input {
+                flex: 1;
+                background: transparent;
+                border: none;
+                border-bottom: 2px solid #3d556b;
+                padding: 4px 4px 6px 4px;
+                font-size: 0.9rem;
+                color: #e8edf3;
+                outline: none;
+                transition: 0.15s;
+                border-radius: 0;
+                font-family: 'Consolas', 'Courier New', monospace;
+            }
+
+            .console-window .console-footer input:focus {
+                border-bottom-color: #5b7a9a;
+                border-bottom-width: 3px;
+            }
+
+            .console-window .console-footer input::placeholder {
+                color: #5a7a8a;
+                font-weight: 300;
+            }
+
+            .console-window .console-footer .console-send-btn {
+                background: #2a4055;
+                color: #e8edf3;
+                border: none;
+                padding: 4px 18px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: 0.15s;
+                font-weight: 500;
+                flex-shrink: 0;
+            }
+
+            .console-window .console-footer .console-send-btn:hover {
+                background: #3a5a7a;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            /* ============================================================
+               RESPONSIVE - Grid layout for exp-panels
+               ============================================================ */
+            @media (max-width: 1200px) {
+                .holder {
+                    grid-template-columns: 1fr 1fr;
+                    gap: 16px;
+                    padding: 0 16px;
+                }
+                .right-panel {
+                    width: 400px;
+                    right: -420px;
+                }
+            }
+
+            @media (max-width: 992px) {
+                .holder {
+                    grid-template-columns: 1fr 1fr;
+                    gap: 14px;
+                    padding: 0 14px;
+                }
+                .right-panel {
+                    width: 380px;
+                    right: -400px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .holder {
+                    grid-template-columns: 1fr;
+                    gap: 14px;
+                    padding: 0 12px;
+                }
+                .holder .exp-panel.full-width {
+                    grid-column: 1;
+                }
+                .right-panel {
+                    width: 100vw;
+                    right: -100vw;
+                }
+                .right-panel.open {
+                    right: 0;
+                }
+                .progression-row {
+                    flex-wrap: wrap;
+                    gap: 4px 6px;
+                }
+                .progression-level-group {
+                    flex-wrap: nowrap;
+                }
+                .rp-info-sign .rp-tooltip {
+                    max-width: 340px;
+                    min-width: 260px;
+                    font-size: 0.75rem;
+                }
+            }
+
+            @media (max-width: 700px) {
+                .holder {
+                    padding: 0 12px;
+                    gap: 14px;
+                }
+                .top-bar {
+                    padding: 0 12px;
+                    height: 36px;
+                    gap: 2px;
+                    flex-wrap: wrap;
+                    border-radius: 0;
+                    margin-bottom: 0;
+                }
+                .dropbtn {
+                    padding: 2px 10px;
+                    font-size: 0.78rem;
+                    height: 26px;
+                }
+                .dropdown-content {
+                    min-width: 140px;
+                    top: 28px;
+                }
+                .dropdown-content a {
+                    padding: 6px 14px;
+                    font-size: 0.75rem;
+                }
+                .sep {
+                    height: 18px;
+                    margin: 0 4px;
+                }
+                .exp-panel {
+                    padding: 18px 16px;
+                    border-radius: 20px;
+                    min-height: 100px;
+                }
+                .name-label {
+                    font-size: 1rem;
+                }
+                .name-input {
+                    font-size: 1rem;
+                    padding: 2px 2px 4px 2px;
+                    min-width: 140px;
+                }
+                .panel-title {
+                    font-size: 1rem;
+                }
+                body {
+                    padding-top: 56px;
+                }
+                .progression-row {
+                    flex-wrap: wrap;
+                    gap: 4px 6px;
+                }
+                .progression-level-group {
+                    flex-wrap: nowrap;
+                }
+                .rp-info-sign .rp-tooltip {
+                    max-width: 300px;
+                    min-width: 200px;
+                    font-size: 0.7rem;
+                }
+                .bottom-cluster {
+                    bottom: 14px;
+                    right: 14px;
+                    gap: 8px;
+                }
+                .lang-switch {
+                    padding: 3px 10px;
+                    height: 36px;
+                }
+                .page-info-btn {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 1rem;
+                }
+            }
+
+            @media (max-width: 600px) {
+                .stats-row {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 10px;
+                }
+                .stat-value {
+                    font-size: 2rem;
+                }
+                .stat-base-input {
+                    width: 70%;
+                    max-width: 70px;
+                    font-size: 0.8rem;
+                }
+                .progression-row {
+                    flex-wrap: wrap;
+                    gap: 4px 6px;
+                }
+                .progression-level-group {
+                    flex-wrap: nowrap;
+                }
+                .exp-change-item {
+                    flex-wrap: wrap;
+                }
+                .exp-change-source {
+                    min-width: 100px;
+                    flex: 2;
+                }
+                .change-value {
+                    min-width: 60px;
+                    flex: 1;
+                }
+                .info-sign .tooltip {
+                    white-space: normal;
+                    min-width: 160px;
+                    right: -10px;
+                }
+                .info-sign .tooltip::before {
+                    right: 16px;
+                }
+                .hp-subcategory {
+                    padding: 12px 14px;
+                    min-height: 44px;
+                    border-radius: 18px;
+                    gap: 8px;
+                }
+                .stat-line {
+                    padding: 4px 8px;
+                }
+                .stat-line-label,
+                .stat-line-value {
+                    font-size: 0.95rem;
+                }
+                .stat-line-value {
+                    padding: 2px 12px;
+                    min-width: 30px;
+                }
+                .stat-line-hp .stat-line-label,
+                .stat-line-hp .stat-line-hp-input,
+                .stat-line-hp .stat-line-separator {
+                    font-size: 1.3rem;
+                }
+                .stat-line-hp .stat-line-hp-input {
+                    width: 36px;
+                    font-size: 1.1rem;
+                    padding: 1px 2px 2px 2px;
+                }
+                .stat-base-input-small {
+                    width: 50px;
+                    font-size: 0.8rem;
+                }
+                .stat-base-label-small {
+                    font-size: 0.75rem;
+                }
+                .exp-panel {
+                    padding: 18px 16px;
+                    border-radius: 20px;
+                    min-height: 100px;
+                }
+                .panel-title {
+                    font-size: 1rem;
+                }
+                .skill-label {
+                    font-size: 0.85rem;
+                }
+                .skill-ability {
+                    font-size: 0.7rem;
+                }
+                .skill-value {
+                    font-size: 0.85rem;
+                    padding: 1px 10px;
+                    min-width: 24px;
+                }
+                .skill-line .skill-tooltip {
+                    font-size: 0.7rem;
+                    max-width: 200px;
+                    padding: 6px 10px;
+                }
+                .proficiency-source {
+                    font-size: 0.85rem;
+                    min-width: 80px;
+                }
+                .proficiency-select {
+                    font-size: 0.85rem;
+                    min-width: 100px;
+                }
+                .proficiency-item {
+                    flex-wrap: wrap;
+                    padding: 6px 10px;
+                }
+                .stat-checkbox {
+                    width: 16px;
+                    height: 16px;
+                }
+                .stat-checkbox:checked::after {
+                    font-size: 10px;
+                }
+                .stat-sub-value {
+                    font-size: 0.85rem;
+                    padding: 1px 10px;
+                }
+                .stat-sub-box {
+                    gap: 6px;
+                }
+                .inventory-textarea {
+                    min-height: 120px;
+                    font-size: 0.85rem;
+                    padding: 12px 14px;
+                }
+                .note-body-textarea {
+                    min-height: 70px;
+                    font-size: 0.85rem;
+                    padding: 8px 10px;
+                }
+                .note-title-input {
+                    font-size: 0.95rem;
+                }
+                .note-item {
+                    padding: 12px 14px;
+                    gap: 8px;
+                }
+                .notes-container {
+                    gap: 12px;
+                }
+                .console-window {
+                    width: 95vw;
+                    min-height: 240px;
+                    top: 60px;
+                }
+                .console-window .console-body {
+                    min-height: 120px;
+                    max-height: 240px;
+                    font-size: 0.75rem;
+                    padding: 8px 10px;
+                }
+                .console-window .console-footer input {
+                    font-size: 0.8rem;
+                }
+                .console-window .console-footer .console-send-btn {
+                    font-size: 0.75rem;
+                    padding: 3px 14px;
+                }
+                .console-window .console-header {
+                    padding: 6px 10px;
+                }
+                .console-window .console-header-right .console-btn {
+                    font-size: 0.7rem;
+                    padding: 2px 8px;
+                }
+                .console-window .console-header-title {
+                    font-size: 0.7rem;
+                }
+                .stat-effects-source,
+                .stat-effects-select,
+                .stat-effects-value {
+                    font-size: 0.85rem;
+                    min-width: 70px;
+                }
+                .stat-effects-item {
+                    flex-wrap: wrap;
+                    padding: 6px 10px;
+                }
+                .holder {
+                    grid-template-columns: 1fr;
+                }
+                .rp-subpanel .rp-textarea {
+                    min-height: 100px;
+                }
+                .rp-calc-item .calc-row {
+                    flex-wrap: nowrap;
+                }
+                .rp-calc-item .calc-row .calc-input {
+                    min-width: 60px;
+                }
+                .rp-calc-item .calc-row .calc-btn {
+                    font-size: 0.7rem;
+                    padding: 2px 8px;
+                }
+                .rp-calc-item .calc-row .calc-btn-delete {
+                    font-size: 1rem;
+                    padding: 2px 4px;
+                }
+                .rp-info-sign .rp-tooltip {
+                    max-width: 260px;
+                    min-width: 180px;
+                    font-size: 0.7rem;
+                    padding: 8px 12px;
+                }
+                .right-panel {
+                    width: 100vw;
+                    right: -100vw;
+                }
+                .bottom-cluster {
+                    bottom: 14px;
+                    right: 14px;
+                    gap: 8px;
+                }
+                .lang-switch {
+                    padding: 3px 10px;
+                    height: 34px;
+                }
+                .lang-switch label {
+                    font-size: 0.65rem;
+                }
+                .page-info-btn {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 1rem;
+                }
+            }
+
+            @media (max-width: 500px) {
+                .top-bar {
+                    justify-content: center;
+                }
+                .dropbtn {
+                    padding: 2px 8px;
+                    font-size: 0.72rem;
+                }
+                .exp-panel {
+                    padding: 14px 12px;
+                    border-radius: 16px;
+                    min-height: 80px;
+                }
+                .name-row {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 6px;
+                }
+                .name-input {
+                    min-width: unset;
+                }
+                .panel-title {
+                    font-size: 0.9rem;
+                }
+                .progression-row {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 4px 6px;
+                }
+                .progression-level-group {
+                    flex-wrap: nowrap;
+                }
+                body {
+                    padding-top: 52px;
+                }
+                .holder {
+                    grid-template-columns: 1fr;
+                    padding: 0 10px;
+                    gap: 12px;
+                }
+                .rp-subpanel .rp-textarea {
+                    min-height: 80px;
+                    font-size: 0.8rem;
+                }
+                .rp-calc-item .calc-input {
+                    font-size: 0.8rem;
+                }
+                .rp-calc-item .calc-description {
+                    font-size: 0.75rem;
+                }
+                .rp-calc-item .calc-row {
+                    flex-wrap: wrap;
+                    gap: 4px;
+                }
+                .rp-calc-item .calc-row .calc-input {
+                    min-width: 80px;
+                    flex: 1 1 100%;
+                }
+                .rp-calc-item .calc-row .calc-btn {
+                    align-self: flex-end;
+                }
+                .rp-info-sign .rp-tooltip {
+                    max-width: 220px;
+                    min-width: 140px;
+                    font-size: 0.65rem;
+                    padding: 6px 10px;
+                }
+                .right-panel {
+                    width: 100vw;
+                    right: -100vw;
+                }
+                .bottom-cluster {
+                    bottom: 12px;
+                    right: 12px;
+                    gap: 6px;
+                }
+                .lang-switch {
+                    padding: 2px 8px;
+                    height: 32px;
+                }
+                .lang-switch label {
+                    font-size: 0.6rem;
+                    padding: 1px 4px;
+                }
+                .page-info-btn {
+                    width: 32px;
+                    height: 32px;
+                    font-size: 0.9rem;
+                }
+            }
+
+            @media (max-width: 400px) {
+                .stats-row {
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
+                }
+                .stat-box {
+                    padding: 10px 6px 8px;
+                }
+                .stat-value {
+                    font-size: 1.6rem;
+                }
+                .stat-title {
+                    font-size: 0.65rem;
+                }
+                .stat-bonus {
+                    font-size: 0.7rem;
+                    padding: 1px 10px;
+                }
+                .stat-base-input {
+                    width: 60%;
+                    max-width: 60px;
+                    font-size: 0.75rem;
+                }
+                .stat-base-label {
+                    font-size: 0.55rem;
+                }
+                .stat-sub-value {
+                    font-size: 0.85rem;
+                    padding: 1px 10px;
+                }
+                .progression-row {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 3px 5px;
+                }
+                .progression-level-group {
+                    flex-wrap: nowrap;
+                }
+                .progression-label,
+                .progression-level-label,
+                .progression-level-paren,
+                .progression-next-level,
+                .progression-separator {
+                    font-size: 0.9rem;
+                }
+                .progression-value,
+                .progression-level-value,
+                .progression-next-level-value,
+                .progression-next-level-exp {
+                    font-size: 0.95rem;
+                    padding: 1px 6px;
+                }
+                .exp-change-item {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 6px;
+                }
+                .change-remove-btn {
+                    align-self: flex-end;
+                }
+                .info-sign .tooltip {
+                    min-width: 140px;
+                    font-size: 0.75rem;
+                    padding: 8px 12px;
+                    right: -20px;
+                }
+                .info-sign .tooltip::before {
+                    right: 24px;
+                }
+                .hp-subcategory {
+                    padding: 10px 12px;
+                    min-height: 38px;
+                    border-radius: 14px;
+                    gap: 6px;
+                }
+                .stat-line {
+                    padding: 3px 6px;
+                }
+                .stat-line-label,
+                .stat-line-value {
+                    font-size: 0.85rem;
+                }
+                .stat-line-value {
+                    padding: 1px 10px;
+                    min-width: 24px;
+                }
+                .stat-line-hp .stat-line-label,
+                .stat-line-hp .stat-line-hp-input,
+                .stat-line-hp .stat-line-separator {
+                    font-size: 1.1rem;
+                }
+                .stat-line-hp .stat-line-hp-input {
+                    width: 30px;
+                    font-size: 0.95rem;
+                    padding: 1px 2px;
+                }
+                .stat-base-input-small {
+                    width: 40px;
+                    font-size: 0.75rem;
+                }
+                .stat-base-label-small {
+                    font-size: 0.7rem;
+                }
+                .exp-panel {
+                    padding: 14px 12px;
+                    border-radius: 16px;
+                    min-height: 80px;
+                }
+                .panel-title {
+                    font-size: 0.9rem;
+                }
+                .skill-label {
+                    font-size: 0.8rem;
+                }
+                .skill-ability {
+                    font-size: 0.65rem;
+                    padding: 0px 5px;
+                }
+                .skill-value {
+                    font-size: 0.8rem;
+                    padding: 1px 8px;
+                    min-width: 20px;
+                }
+                .skill-line .skill-tooltip {
+                    font-size: 0.65rem;
+                    max-width: 160px;
+                    padding: 4px 8px;
+                }
+                .proficiency-source {
+                    font-size: 0.8rem;
+                    min-width: 60px;
+                }
+                .proficiency-select {
+                    font-size: 0.8rem;
+                    min-width: 80px;
+                    padding-right: 20px;
+                }
+                .proficiency-item {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 6px;
+                    padding: 6px 8px;
+                }
+                .proficiency-remove-btn {
+                    align-self: flex-end;
+                }
+                .stat-checkbox {
+                    width: 14px;
+                    height: 14px;
+                }
+                .stat-checkbox:checked::after {
+                    font-size: 8px;
+                }
+                .stat-sub-box {
+                    gap: 4px;
+                }
+                .inventory-textarea {
+                    min-height: 100px;
+                    font-size: 0.8rem;
+                    padding: 10px 12px;
+                }
+                .note-body-textarea {
+                    min-height: 60px;
+                    font-size: 0.8rem;
+                    padding: 6px 8px;
+                }
+                .note-title-input {
+                    font-size: 0.85rem;
+                }
+                .note-item {
+                    padding: 10px 12px;
+                    gap: 6px;
+                }
+                .notes-container {
+                    gap: 10px;
+                }
+                .note-header {
+                    gap: 8px;
+                }
+                .console-window {
+                    width: 98vw;
+                    min-height: 200px;
+                    top: 50px;
+                    border-radius: 10px;
+                }
+                .console-window .console-body {
+                    min-height: 100px;
+                    max-height: 180px;
+                    font-size: 0.7rem;
+                    padding: 6px 8px;
+                }
+                .console-window .console-footer input {
+                    font-size: 0.75rem;
+                }
+                .console-window .console-footer .console-send-btn {
+                    font-size: 0.7rem;
+                    padding: 2px 10px;
+                }
+                .console-window .console-header {
+                    padding: 4px 8px;
+                }
+                .console-window .console-header-right .console-btn {
+                    font-size: 0.65rem;
+                    padding: 2px 6px;
+                }
+                .console-window .console-header-title {
+                    font-size: 0.7rem;
+                }
+                .stat-effects-source,
+                .stat-effects-select,
+                .stat-effects-value {
+                    font-size: 0.8rem;
+                    min-width: 60px;
+                }
+                .stat-effects-item {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 6px;
+                    padding: 6px 8px;
+                }
+                .stat-effects-remove-btn {
+                    align-self: flex-end;
+                }
+                .holder {
+                    grid-template-columns: 1fr;
+                    padding: 0 8px;
+                    gap: 10px;
+                }
+                .rp-subpanel .rp-textarea {
+                    min-height: 70px;
+                    font-size: 0.75rem;
+                    padding: 8px 10px;
+                }
+                .rp-subpanel {
+                    padding: 12px 14px;
+                }
+                .rp-calc-item {
+                    padding: 8px 10px;
+                    min-height: 50px;
+                }
+                .rp-calc-item .calc-row {
+                    flex-wrap: wrap;
+                    gap: 4px;
+                }
+                .rp-calc-item .calc-row .calc-input {
+                    min-width: 60px;
+                    flex: 1 1 100%;
+                    font-size: 0.75rem;
+                }
+                .rp-calc-item .calc-row .calc-btn {
+                    font-size: 0.65rem;
+                    padding: 2px 8px;
+                }
+                .rp-calc-item .calc-row .calc-btn-delete {
+                    font-size: 0.9rem;
+                }
+                .rp-calc-item .calc-description {
+                    font-size: 0.7rem;
+                }
+                .rp-calc-add-btn {
+                    font-size: 0.7rem;
+                    padding: 4px 12px;
+                }
+                .rp-info-sign .rp-tooltip {
+                    max-width: 180px;
+                    min-width: 120px;
+                    font-size: 0.6rem;
+                    padding: 6px 8px;
+                    bottom: calc(100% + 8px);
+                }
+                .right-panel {
+                    width: 100vw;
+                    right: -100vw;
+                }
+                .bottom-cluster {
+                    bottom: 10px;
+                    right: 10px;
+                    gap: 6px;
+                }
+                .lang-switch {
+                    padding: 2px 6px;
+                    height: 28px;
+                }
+                .lang-switch label {
+                    font-size: 0.55rem;
+                    padding: 1px 3px;
+                }
+                .lang-switch .lang-separator {
+                    font-size: 0.6rem;
+                }
+                .page-info-btn {
+                    width: 28px;
+                    height: 28px;
+                    font-size: 0.8rem;
+                }
+                .page-info-box {
+                    min-width: 160px;
+                    max-width: 220px;
+                    font-size: 0.7rem;
+                    padding: 10px 12px;
+                    bottom: calc(100% + 8px);
+                    right: -4px;
+                }
+            }
+
+            @media (max-width: 380px) {
+                body {
+                    padding-top: 48px;
+                }
+                .holder {
+                    padding: 0 6px;
+                    gap: 8px;
+                }
+                .progression-row {
+                    flex-wrap: wrap;
+                    gap: 2px 4px;
+                }
+                .progression-value,
+                .progression-level-value,
+                .progression-next-level-value,
+                .progression-next-level-exp {
+                    font-size: 0.85rem;
+                    padding: 1px 4px;
+                }
+                .progression-label,
+                .progression-level-label,
+                .progression-level-paren,
+                .progression-next-level,
+                .progression-separator {
+                    font-size: 0.8rem;
+                }
+                .rp-info-sign .rp-tooltip {
+                    max-width: 150px;
+                    min-width: 100px;
+                    font-size: 0.55rem;
+                    padding: 4px 6px;
+                }
+                .right-panel {
+                    width: 100vw;
+                    right: -100vw;
+                }
+                .bottom-cluster {
+                    bottom: 8px;
+                    right: 8px;
+                    gap: 4px;
+                }
+                .lang-switch {
+                    padding: 2px 4px;
+                    height: 24px;
+                }
+                .lang-switch label {
+                    font-size: 0.5rem;
+                    padding: 1px 2px;
+                }
+                .page-info-btn {
+                    width: 24px;
+                    height: 24px;
+                    font-size: 0.7rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="holder">
+
+            <!-- TOP BAR — fixed at top -->
+            <div class="top-bar">
+                <div class="top-bar-left">
+                    <div class="dropdown" id="dropdown-file">
+                        <button class="dropbtn" data-dropdown="dropdown-file">File</button>
+                        <div class="dropdown-content">
+                            <a data-action="new">New</a>
+                            <a data-action="open">Open</a>
+                            <a data-action="export">Export</a>
+                        </div>
+                    </div>
+
+                    <div class="dropdown" id="dropdown-tool">
+                        <button class="dropbtn" data-dropdown="dropdown-tool">Tool</button>
+                        <div class="dropdown-content">
+                            <a data-action="py3" id="py3-console-trigger">Py3 console</a>
+                            <a data-action="more">More in the future</a>
+                        </div>
+                    </div>
+
+                    <div class="sep"></div>
+
+                    <div class="dropdown" id="dropdown-instructions-parts">
+                        <button class="dropbtn" data-dropdown="dropdown-instructions-parts">Instructions and parts</button>
+                        <div class="dropdown-content">
+                            <a href="https://roll20.net/">Roll20</a>
+                            <a href="https://dnd.su/">dnd.su</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="top-bar-right">
+                    <button class="menu-btn" id="menu-btn" aria-label="Toggle right panel">
+                        <span class="menu-line"></span>
+                        <span class="menu-line"></span>
+                        <span class="menu-line"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==========================================================
+                   RIGHT PANEL
+                   ========================================================== -->
+            <div class="right-panel-overlay" id="right-panel-overlay"></div>
+
+            <div class="right-panel" id="right-panel">
+                <div class="right-panel-header">
+                    <h2>Quick actions</h2>
+                    <button class="right-panel-close-btn" id="right-panel-close-btn">✕</button>
+                </div>
+                <div class="right-panel-body">
+                    <!-- Sub-panel 1: Quicknotes -->
+                    <div class="rp-subpanel">
+                        <div class="rp-subpanel-title-wrapper">
+                            <span class="rp-subpanel-title">Quicknotes</span>
+                        </div>
+                        <textarea id="qn-field" class="rp-textarea" placeholder="For statuses and important stuff"></textarea>
+                    </div>
+
+                    <!-- Sub-panel 2: Precalculation -->
+                    <div class="rp-subpanel">
+                        <div class="rp-subpanel-title-wrapper">
+                            <span class="rp-subpanel-title">Precalculation</span>
+                            <span class="rp-info-sign">
+                                ?
+                                <span class="rp-tooltip">Enter py3 evaluation command then click the send button. Send button text will change to the operation result.</span>
+                            </span>
+                        </div>
+                        <div class="rp-calc-list" id="rp-calc-list">
+                            <!-- Elements will be added here by JavaScript -->
+                        </div>
+                        <button class="rp-calc-add-btn" id="rp-calc-add-btn">🎲 New calc</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================================
+                   PANEL 1: Character Info — exp-panel with ID charp-info (full-width)
+                   ========================================================== -->
+            <div id="charp-info" class="exp-panel full-width">
+                <div class="panel-content">
+                    <!-- Name row: label + editable field (underline only, no placeholder) -->
+                    <div class="name-row">
+                        <span class="name-label" id="name-label">Name:</span>
+                        <input type="text" class="name-input" id="characterName">
+                    </div>
+
+                    <!-- HP SUBCATEGORY — big bordered round box with HP, Mastery, AC, Speed -->
+                    <div class="hp-subcategory">
+                        <!-- HP Row (larger font, consistent layout) -->
+                        <div class="stat-line stat-line-hp">
+                            <div class="stat-line-left">
+                                <span class="stat-line-label" id="hp-label">HP</span>
+                            </div>
+                            <div class="stat-line-left">
+                                <input type="text" class="stat-line-hp-input" id="cur-hp" value="0" placeholder="0">
+                                <span class="stat-line-separator">/</span>
+                                <input type="text" class="stat-line-hp-input" id="max-hp" value="0" placeholder="0">
+                            </div>
+                        </div>
+
+                        <!-- Mastery Row -->
+                        <div class="stat-line">
+                            <div class="stat-line-left">
+                                <span class="stat-line-label" id="mastery-label">Mastery</span>
+                            </div>
+                            <span id="mastery-mod" class="stat-line-value">+0</span>
+                        </div>
+
+                        <!-- Armor Class Row with hover reveal and border -->
+                        <div class="stat-line">
+                            <div class="stat-line-left">
+                                <span class="stat-line-label" id="armor-class-label">Armor class:</span>
+                                <span class="stat-base-wrapper">
+                                    <span class="stat-base-label-small" id="base-value-label">base value:</span>
+                                    <input type="text" class="stat-base-input-small" id="ac-base" placeholder="0">
+                                </span>
+                            </div>
+                            <span class="stat-line-value" id="final-ac">0</span>
+                        </div>
+
+                        <!-- Speed Row with hover reveal and border -->
+                        <div class="stat-line">
+                            <div class="stat-line-left">
+                                <span class="stat-line-label" id="speed-label">Speed:</span>
+                                <span class="stat-base-wrapper">
+                                    <span class="stat-base-label-small" id="base-value-label-2">base value:</span>
+                                    <input type="text" class="stat-base-input-small" id="spd-base" placeholder="0">
+                                </span>
+                            </div>
+                            <span class="stat-line-value" id="final-spd">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Stats header with info sign -->
+                    <div class="stats-header">
+                        <div class="info-sign">
+                            ?
+                            <div class="tooltip">
+                                <span class="tooltip-line">Bigger value is stat</span>
+                                <span class="tooltip-line">Smallest value is modifier</span>
+                                <span class="tooltip-line">Value on bottom is <em>saving throw</em></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STATS ROW: 6 boxes with base value fields (all show on hover) -->
+                    <div class="stats-row">
+                        <!-- Str -->
+                        <div class="stat-box">
+                            <div class="stat-title" id="stat-title-Str">Str</div>
+                            <div class="stat-value" id="stat.Str">0</div>
+                            <div class="stat-bonus" id="bonus.Str">0</div>
+                            <div class="stat-base-row">
+                                <input type="text" class="stat-base-input" id="stat.base.Str" value="10" placeholder="Number">
+                                <span class="stat-base-label" id="base-value-label-3">Base value</span>
+                            </div>
+                            <div class="stat-sub-box">
+                                <span class="stat-sub-value" id="st.Str">0</span>
+                                <input type="checkbox" class="stat-checkbox" id="st.pf.Str">
+                            </div>
+                        </div>
+                        <!-- Dex -->
+                        <div class="stat-box">
+                            <div class="stat-title" id="stat-title-Dex">Dex</div>
+                            <div class="stat-value" id="stat.Dex">0</div>
+                            <div class="stat-bonus" id="bonus.Dex">0</div>
+                            <div class="stat-base-row">
+                                <input type="text" class="stat-base-input" id="stat.base.Dex" value="10" placeholder="Number">
+                                <span class="stat-base-label">Base value</span>
+                            </div>
+                            <div class="stat-sub-box">
+                                <span class="stat-sub-value" id="st.Dex">0</span>
+                                <input type="checkbox" class="stat-checkbox" id="st.pf.Dex">
+                            </div>
+                        </div>
+                        <!-- Con -->
+                        <div class="stat-box">
+                            <div class="stat-title" id="stat-title-Con">Con</div>
+                            <div class="stat-value" id="stat.Con">0</div>
+                            <div class="stat-bonus" id="bonus.Con">0</div>
+                            <div class="stat-base-row">
+                                <input type="text" class="stat-base-input" id="stat.base.Con" value="10" placeholder="Number">
+                                <span class="stat-base-label">Base value</span>
+                            </div>
+                            <div class="stat-sub-box">
+                                <span class="stat-sub-value" id="st.Con">0</span>
+                                <input type="checkbox" class="stat-checkbox" id="st.pf.Con">
+                            </div>
+                        </div>
+                        <!-- Int -->
+                        <div class="stat-box">
+                            <div class="stat-title" id="stat-title-Int">Int</div>
+                            <div class="stat-value" id="stat.Int">0</div>
+                            <div class="stat-bonus" id="bonus.Int">0</div>
+                            <div class="stat-base-row">
+                                <input type="text" class="stat-base-input" id="stat.base.Int" value="10" placeholder="Number">
+                                <span class="stat-base-label">Base value</span>
+                            </div>
+                            <div class="stat-sub-box">
+                                <span class="stat-sub-value" id="st.Int">0</span>
+                                <input type="checkbox" class="stat-checkbox" id="st.pf.Int">
+                            </div>
+                        </div>
+                        <!-- Wis -->
+                        <div class="stat-box">
+                            <div class="stat-title" id="stat-title-Wis">Wis</div>
+                            <div class="stat-value" id="stat.Wis">0</div>
+                            <div class="stat-bonus" id="bonus.Wis">0</div>
+                            <div class="stat-base-row">
+                                <input type="text" class="stat-base-input" id="stat.base.Wis" value="10" placeholder="Number">
+                                <span class="stat-base-label">Base value</span>
+                            </div>
+                            <div class="stat-sub-box">
+                                <span class="stat-sub-value" id="st.Wis">0</span>
+                                <input type="checkbox" class="stat-checkbox" id="st.pf.Wis">
+                            </div>
+                        </div>
+                        <!-- Cha -->
+                        <div class="stat-box">
+                            <div class="stat-title" id="stat-title-Cha">Cha</div>
+                            <div class="stat-value" id="stat.Cha">0</div>
+                            <div class="stat-bonus" id="bonus.Cha">0</div>
+                            <div class="stat-base-row">
+                                <input type="text" class="stat-base-input" id="stat.base.Cha" value="10" placeholder="Number">
+                                <span class="stat-base-label">Base value</span>
+                            </div>
+                            <div class="stat-sub-box">
+                                <span class="stat-sub-value" id="st.Cha">0</span>
+                                <input type="checkbox" class="stat-checkbox" id="st.pf.Cha">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Effects Subsection -->
+                    <div class="effects-subtitle" id="effects-title">Effects</div>
+
+                    <!-- Effects interactive list -->
+                    <div class="effects-list" id="statEffects-list">
+                        <!-- Elements will be added here by JavaScript -->
+                    </div>
+
+                    <!-- Add button -->
+                    <button class="effects-add-btn" id="effects-add-btn">Add Effect</button>
+
+                </div>
+            </div>
+
+            <!-- ==========================================================
+                   PANEL 2: Abilities — exp-panel with skill list + Proficiency
+                   ========================================================== -->
+            <div class="exp-panel">
+                <div class="panel-content">
+                    <div class="panel-title" id="abilities-title">Abilities</div>
+
+                    <!-- Athletics -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Athletics">Athletics</span>
+                            <span class="skill-ability" id="sk-ability-Athletics">(STR)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Athletics">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Athletics">Climbing, jumping, or swimming through rough conditions.</span>
+                    </div>
+
+                    <!-- Acrobatics -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Acrobatics">Acrobatics</span>
+                            <span class="skill-ability" id="sk-ability-Acrobatics">(DEX)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Acrobatics">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Acrobatics">Balancing, tumbling, or staying on your feet.</span>
+                    </div>
+
+                    <!-- Sleight of Hand -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Sleight_of_Hand">Sleight of Hand</span>
+                            <span class="skill-ability" id="sk-ability-Sleight_of_Hand">(DEX)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Sleight_of_Hand">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Sleight_of_Hand">Trickery, picking pockets, or concealing objects.</span>
+                    </div>
+
+                    <!-- Stealth -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Stealth">Stealth</span>
+                            <span class="skill-ability" id="sk-ability-Stealth">(DEX)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Stealth">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Stealth">Hiding and moving silently past enemies.</span>
+                    </div>
+
+                    <!-- Arcana -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Arcana">Arcana</span>
+                            <span class="skill-ability" id="sk-ability-Arcana">(INT)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Arcana">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Arcana">Knowledge of spells, magic items, and magical traditions.</span>
+                    </div>
+
+                    <!-- History -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-History">History</span>
+                            <span class="skill-ability" id="sk-ability-History">(INT)</span>
+                        </div>
+                        <span class="skill-value" id="sk.History">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-History">Recall of historical events, past rulers, and ancient kingdoms.</span>
+                    </div>
+
+                    <!-- Investigation -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Investigation">Investigation</span>
+                            <span class="skill-ability" id="sk-ability-Investigation">(INT)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Investigation">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Investigation">Deducing clues, searching areas logically, and finding hidden details.</span>
+                    </div>
+
+                    <!-- Nature -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Nature">Nature</span>
+                            <span class="skill-ability" id="sk-ability-Nature">(INT)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Nature">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Nature">Knowledge of terrain, plants, animals, and weather.</span>
+                    </div>
+
+                    <!-- Religion -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Religion">Religion</span>
+                            <span class="skill-ability" id="sk-ability-Religion">(INT)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Religion">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Religion">Recall of deities, holy symbols, and religious rites.</span>
+                    </div>
+
+                    <!-- Animal Handling -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Animal_Handling">Animal Handling</span>
+                            <span class="skill-ability" id="sk-ability-Animal_Handling">(WIS)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Animal_Handling">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Animal_Handling">Calming or predicting the behavior of animals.</span>
+                    </div>
+
+                    <!-- Insight -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Insight">Insight</span>
+                            <span class="skill-ability" id="sk-ability-Insight">(WIS)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Insight">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Insight">Reading a person's mood, intent, or truthfulness.</span>
+                    </div>
+
+                    <!-- Medicine -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Medicine">Medicine</span>
+                            <span class="skill-ability" id="sk-ability-Medicine">(WIS)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Medicine">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Medicine">Stabilizing the dying or diagnosing illnesses.</span>
+                    </div>
+
+                    <!-- Perception -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Perception">Perception</span>
+                            <span class="skill-ability" id="sk-ability-Perception">(WIS)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Perception">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Perception">Spotting, hearing, or sensing things in the environment.</span>
+                    </div>
+
+                    <!-- Survival -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Survival">Survival</span>
+                            <span class="skill-ability" id="sk-ability-Survival">(WIS)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Survival">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Survival">Tracking, navigating the wilderness, and predicting weather.</span>
+                    </div>
+
+                    <!-- Deception -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Deception">Deception</span>
+                            <span class="skill-ability" id="sk-ability-Deception">(CHA)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Deception">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Deception">Telling lies or misleading others convincingly.</span>
+                    </div>
+
+                    <!-- Intimidation -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Intimidation">Intimidation</span>
+                            <span class="skill-ability" id="sk-ability-Intimidation">(CHA)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Intimidation">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Intimidation">Threatening or coercing targets to get your way.</span>
+                    </div>
+
+                    <!-- Performance -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Performance">Performance</span>
+                            <span class="skill-ability" id="sk-ability-Performance">(CHA)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Performance">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Performance">Entertaining an audience through acting, music, or dance.</span>
+                    </div>
+
+                    <!-- Persuasion -->
+                    <div class="skill-line">
+                        <div class="skill-line-left">
+                            <span class="skill-label" id="sk-label-Persuasion">Persuasion</span>
+                            <span class="skill-ability" id="sk-ability-Persuasion">(CHA)</span>
+                        </div>
+                        <span class="skill-value" id="sk.Persuasion">0</span>
+                        <span class="skill-tooltip" id="sk-tooltip-Persuasion">Influencing people smoothly through diplomacy and tact.</span>
+                    </div>
+
+                    <!-- Proficiency Subsection -->
+                    <div class="proficiency-subtitle" id="proficiency-title">Proficiency</div>
+
+                    <!-- Proficiency interactive list -->
+                    <div class="proficiency-list" id="proficiency-list">
+                        <!-- Elements will be added here by JavaScript -->
+                    </div>
+
+                    <!-- Add button -->
+                    <button class="proficiency-add-btn" id="add-proficiency-btn">Add proficiency</button>
+
+                </div>
+            </div>
+
+            <!-- ==========================================================
+                   PANEL 3: Progression — exp-panel with ID charp-prog
+                   ========================================================== -->
+            <div id="charp-prog" class="exp-panel">
+                <div class="panel-content">
+                    <div class="panel-title" id="progression-title">Progression</div>
+
+                    <!-- Line 1: Exp label + value display -->
+                    <div class="progression-row">
+                        <span class="progression-label" id="exp-label">Exp:</span>
+                        <span class="progression-value" id="exp-val">0</span>
+                        <span class="progression-level-group">
+                            <span class="progression-level-label" id="level-label">Level</span>
+                            <span class="progression-level-paren">(</span>
+                            <span class="progression-level-value" id="lvl">0</span>
+                            <span class="progression-level-paren">)</span>
+                        </span>
+                    </div>
+
+                    <!-- Line 2: Until level + next level exp -->
+                    <div class="progression-row">
+                        <span class="progression-next-level" id="until-level-label">Until level</span>
+                        <span class="progression-next-level-value" id="next-lvl">0</span>
+                        <span class="progression-separator">:</span>
+                        <span class="progression-next-level-exp" id="next-lvl-exp">0</span>
+                    </div>
+
+                    <!-- Line 3: Until level 20 + exp to level 20 -->
+                    <div class="progression-row">
+                        <span class="progression-next-level" id="until-level-20-label">Until level</span>
+                        <span class="progression-next-level-value">20</span>
+                        <span class="progression-separator">:</span>
+                        <span class="progression-next-level-exp" id="til-twenty">0</span>
+                    </div>
+
+                    <!-- Line 4: Changes subtitle -->
+                    <div class="changes-subtitle" id="changes-title">Changes</div>
+
+                    <!-- Changes interactive list -->
+                    <div class="exp-changes-list" id="exp-changes-list">
+                        <!-- Elements will be added here by JavaScript -->
+                    </div>
+
+                    <!-- Add button -->
+                    <button class="change-add-btn" id="add-exp-change-btn">New exp</button>
+
+                </div>
+            </div>
+
+            <!-- ==========================================================
+                   PANEL 4: Inventory — exp-panel with scalable textfield
+                   ========================================================== -->
+            <div class="exp-panel">
+                <div class="panel-content">
+                    <div class="panel-title" id="inventory-title">Inventory</div>
+                    <textarea id="inv-content" class="inventory-textarea" placeholder="Items here... Very intuitive to use I.G."></textarea>
+                </div>
+            </div>
+
+            <!-- ==========================================================
+                   PANEL 5: Notes in text — exp-panel
+                   ========================================================== -->
+            <div class="exp-panel">
+                <div class="panel-content">
+                    <div class="panel-title" id="notes-title">Notes in text</div>
+
+                    <div class="notes-container" id="notes-container">
+                        <button class="notes-add-btn" id="add-note-btn">New note</button>
+                        <!-- Note elements will be added here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==========================================================
+               BOTTOM-RIGHT CLUSTER — Language switch + Info button
+               ========================================================== -->
+        <div class="bottom-cluster">
+            <!-- Language switch -->
+            <div class="lang-switch" id="lang-switch">
+                <label id="lang-en" class="active">EN</label>
+                <span class="lang-separator">|</span>
+                <label id="lang-ru">RU</label>
+            </div>
+
+            <!-- Page info button -->
+            <div class="page-info" id="page-info">
+                <div class="page-info-btn" id="page-info-btn">ⓘ</div>
+                <div class="page-info-box" id="page-info-box">
+                    <span class="info-title">📜 Authors</span>
+                    <span class="info-author">
+                        <strong>LeastDepressedDev</strong>
+                        (<a href="https://github.com/LeastDepressedDev/" target="_blank">GitHub</a>)
+                    </span>
+                    <span class="info-author">
+                        <strong>DeepSeek</strong>
+                        (<a href="https://deepseek.com" target="_blank">deepseek.com</a>)
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== MERGED SCRIPT: UI Logic & Page Info Toggle ========== -->
+        <script>
+            (function() {
+                // =========================================================
+                // SCRIPT 1: dropdown UI logic
+                // =========================================================
+                const dropdownButtons = document.querySelectorAll('.dropbtn');
+
+                dropdownButtons.forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const dropdown = this.closest('.dropdown');
+                        if (!dropdown) return;
+
+                        document.querySelectorAll('.dropdown.open').forEach(d => {
+                            if (d !== dropdown) d.classList.remove('open');
+                        });
+
+                        dropdown.classList.toggle('open');
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    const isDropdown = e.target.closest('.dropdown');
+                    if (!isDropdown) {
+                        document.querySelectorAll('.dropdown.open').forEach(d => {
+                            d.classList.remove('open');
+                        });
+                    }
+                });
+
+                document.querySelectorAll('.dropdown-content a').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        const dropdown = this.closest('.dropdown');
+                        if (dropdown) {
+                            dropdown.classList.remove('open');
+                        }
+                        e.preventDefault();
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.dropdown.open').forEach(d => {
+                            d.classList.remove('open');
+                        });
+                    }
+                });
+
+                // =========================================================
+                // SCRIPT 8: Page info toggle logic
+                // =========================================================
+                const infoBtn = document.getElementById('page-info-btn');
+                const infoBox = document.getElementById('page-info-box');
+
+                if (infoBtn && infoBox) {
+                    infoBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        infoBox.classList.toggle('visible');
+                    });
+
+                    document.addEventListener('click', function(e) {
+                        const isClickInside = infoBox.contains(e.target) || infoBtn.contains(e.target);
+                        if (!isClickInside) {
+                            infoBox.classList.remove('visible');
+                        }
+                    });
+
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape' && infoBox.classList.contains('visible')) {
+                            infoBox.classList.remove('visible');
+                        }
+                    });
+                }
+
+                // =========================================================
+                // Right Panel toggle logic
+                // =========================================================
+                const menuBtn = document.getElementById('menu-btn');
+                const rightPanel = document.getElementById('right-panel');
+                const rightPanelOverlay = document.getElementById('right-panel-overlay');
+                const rightPanelCloseBtn = document.getElementById('right-panel-close-btn');
+
+                function toggleRightPanel() {
+                    const isOpen = rightPanel.classList.toggle('open');
+                    rightPanelOverlay.classList.toggle('visible');
+                    menuBtn.classList.toggle('active');
+                    document.body.style.overflow = isOpen ? 'hidden' : '';
+                }
+
+                function closeRightPanel() {
+                    rightPanel.classList.remove('open');
+                    rightPanelOverlay.classList.remove('visible');
+                    menuBtn.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+
+                if (menuBtn) {
+                    menuBtn.addEventListener('click', toggleRightPanel);
+                }
+
+                if (rightPanelCloseBtn) {
+                    rightPanelCloseBtn.addEventListener('click', closeRightPanel);
+                }
+
+                if (rightPanelOverlay) {
+                    rightPanelOverlay.addEventListener('click', closeRightPanel);
+                }
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && rightPanel.classList.contains('open')) {
+                        closeRightPanel();
+                    }
+                });
+
+                // =========================================================
+                // LANGUAGE SWITCH logic
+                // =========================================================
+                const langEn = document.getElementById('lang-en');
+                const langRu = document.getElementById('lang-ru');
+                let currentLang = 'en';
+
+                // Translation data
+                const translations = {
+                    en: {
+                        // Stats
+                        'stat-title-Str': 'Str',
+                        'stat-title-Dex': 'Dex',
+                        'stat-title-Con': 'Con',
+                        'stat-title-Int': 'Int',
+                        'stat-title-Wis': 'Wis',
+                        'stat-title-Cha': 'Cha',
+                        // Skills
+                        'sk-label-Athletics': 'Athletics',
+                        'sk-label-Acrobatics': 'Acrobatics',
+                        'sk-label-Sleight_of_Hand': 'Sleight of Hand',
+                        'sk-label-Stealth': 'Stealth',
+                        'sk-label-Arcana': 'Arcana',
+                        'sk-label-History': 'History',
+                        'sk-label-Investigation': 'Investigation',
+                        'sk-label-Nature': 'Nature',
+                        'sk-label-Religion': 'Religion',
+                        'sk-label-Animal_Handling': 'Animal Handling',
+                        'sk-label-Insight': 'Insight',
+                        'sk-label-Medicine': 'Medicine',
+                        'sk-label-Perception': 'Perception',
+                        'sk-label-Survival': 'Survival',
+                        'sk-label-Deception': 'Deception',
+                        'sk-label-Intimidation': 'Intimidation',
+                        'sk-label-Performance': 'Performance',
+                        'sk-label-Persuasion': 'Persuasion',
+                        // Skill abilities
+                        'sk-ability-Athletics': '(STR)',
+                        'sk-ability-Acrobatics': '(DEX)',
+                        'sk-ability-Sleight_of_Hand': '(DEX)',
+                        'sk-ability-Stealth': '(DEX)',
+                        'sk-ability-Arcana': '(INT)',
+                        'sk-ability-History': '(INT)',
+                        'sk-ability-Investigation': '(INT)',
+                        'sk-ability-Nature': '(INT)',
+                        'sk-ability-Religion': '(INT)',
+                        'sk-ability-Animal_Handling': '(WIS)',
+                        'sk-ability-Insight': '(WIS)',
+                        'sk-ability-Medicine': '(WIS)',
+                        'sk-ability-Perception': '(WIS)',
+                        'sk-ability-Survival': '(WIS)',
+                        'sk-ability-Deception': '(CHA)',
+                        'sk-ability-Intimidation': '(CHA)',
+                        'sk-ability-Performance': '(CHA)',
+                        'sk-ability-Persuasion': '(CHA)',
+                        // Skill tooltips
+                        'sk-tooltip-Athletics': 'Climbing, jumping, or swimming through rough conditions.',
+                        'sk-tooltip-Acrobatics': 'Balancing, tumbling, or staying on your feet.',
+                        'sk-tooltip-Sleight_of_Hand': 'Trickery, picking pockets, or concealing objects.',
+                        'sk-tooltip-Stealth': 'Hiding and moving silently past enemies.',
+                        'sk-tooltip-Arcana': 'Knowledge of spells, magic items, and magical traditions.',
+                        'sk-tooltip-History': 'Recall of historical events, past rulers, and ancient kingdoms.',
+                        'sk-tooltip-Investigation': 'Deducing clues, searching areas logically, and finding hidden details.',
+                        'sk-tooltip-Nature': 'Knowledge of terrain, plants, animals, and weather.',
+                        'sk-tooltip-Religion': 'Recall of deities, holy symbols, and religious rites.',
+                        'sk-tooltip-Animal_Handling': 'Calming or predicting the behavior of animals.',
+                        'sk-tooltip-Insight': "Reading a person's mood, intent, or truthfulness.",
+                        'sk-tooltip-Medicine': 'Stabilizing the dying or diagnosing illnesses.',
+                        'sk-tooltip-Perception': 'Spotting, hearing, or sensing things in the environment.',
+                        'sk-tooltip-Survival': 'Tracking, navigating the wilderness, and predicting weather.',
+                        'sk-tooltip-Deception': 'Telling lies or misleading others convincingly.',
+                        'sk-tooltip-Intimidation': 'Threatening or coercing targets to get your way.',
+                        'sk-tooltip-Performance': 'Entertaining an audience through acting, music, or dance.',
+                        'sk-tooltip-Persuasion': 'Influencing people smoothly through diplomacy and tact.',
+                        // Panel titles
+                        'abilities-title': 'Abilities',
+                        'proficiency-title': 'Proficiency',
+                        'progression-title': 'Progression',
+                        'inventory-title': 'Inventory',
+                        'notes-title': 'Notes in text',
+                        // Progression labels
+                        'exp-label': 'Exp:',
+                        'level-label': 'Level',
+                        'until-level-label': 'Until level',
+                        'until-level-20-label': 'Until level',
+                        'changes-title': 'Changes',
+                        // Buttons
+                        'add-proficiency-btn': 'Add proficiency',
+                        'add-exp-change-btn': 'New exp',
+                        'add-note-btn': 'New note',
+                        'effects-add-btn': 'Add Effect',
+                        // Right panel
+                        'qn-field': 'For statuses and important stuff',
+                        'inv-content': 'Items here... Very intuitive to use I.G.',
+                        // HP
+                        'hp-label': 'HP',
+                        'mastery-label': 'Mastery',
+                        'armor-class-label': 'Armor class:',
+                        'speed-label': 'Speed:',
+                        // Name
+                        'name-label': 'Name:',
+                        'base-value-label': 'base value:',
+                        'base-value-label-2': 'base value:',
+                        'base-value-label-3': 'Base value',
+                        // Effects
+                        'effects-title': 'Effects',
+                    },
+                    ru: {
+                        // Stats
+                        'stat-title-Str': 'Сил',
+                        'stat-title-Dex': 'Лов',
+                        'stat-title-Con': 'Тел',
+                        'stat-title-Int': 'Инт',
+                        'stat-title-Wis': 'Муд',
+                        'stat-title-Cha': 'Хар',
+                        // Skills
+                        'sk-label-Athletics': 'Атлетика',
+                        'sk-label-Acrobatics': 'Акробатика',
+                        'sk-label-Sleight_of_Hand': 'Ловкость рук',
+                        'sk-label-Stealth': 'Скрытность',
+                        'sk-label-Arcana': 'Магия',
+                        'sk-label-History': 'История',
+                        'sk-label-Investigation': 'Расследование',
+                        'sk-label-Nature': 'Природа',
+                        'sk-label-Religion': 'Религия',
+                        'sk-label-Animal_Handling': 'Уход за животными',
+                        'sk-label-Insight': 'Проницательность',
+                        'sk-label-Medicine': 'Медицина',
+                        'sk-label-Perception': 'Восприятие',
+                        'sk-label-Survival': 'Выживание',
+                        'sk-label-Deception': 'Обман',
+                        'sk-label-Intimidation': 'Запугивание',
+                        'sk-label-Performance': 'Выступление',
+                        'sk-label-Persuasion': 'Убеждение',
+                        // Skill abilities
+                        'sk-ability-Athletics': '(Сил)',
+                        'sk-ability-Acrobatics': '(Лов)',
+                        'sk-ability-Sleight_of_Hand': '(Лов)',
+                        'sk-ability-Stealth': '(Лов)',
+                        'sk-ability-Arcana': '(Инт)',
+                        'sk-ability-History': '(Инт)',
+                        'sk-ability-Investigation': '(Инт)',
+                        'sk-ability-Nature': '(Инт)',
+                        'sk-ability-Religion': '(Инт)',
+                        'sk-ability-Animal_Handling': '(Муд)',
+                        'sk-ability-Insight': '(Муд)',
+                        'sk-ability-Medicine': '(Муд)',
+                        'sk-ability-Perception': '(Муд)',
+                        'sk-ability-Survival': '(Муд)',
+                        'sk-ability-Deception': '(Хар)',
+                        'sk-ability-Intimidation': '(Хар)',
+                        'sk-ability-Performance': '(Хар)',
+                        'sk-ability-Persuasion': '(Хар)',
+                        // Skill tooltips
+                        'sk-tooltip-Athletics': 'Лазание, прыжки или плавание в сложных условиях.',
+                        'sk-tooltip-Acrobatics': 'Балансирование, кувырки или удержание на ногах.',
+                        'sk-tooltip-Sleight_of_Hand': 'Фокусы, карманные кражи или сокрытие предметов.',
+                        'sk-tooltip-Stealth': 'Скрытие и бесшумное передвижение мимо врагов.',
+                        'sk-tooltip-Arcana': 'Знания о заклинаниях, магических предметах и традициях.',
+                        'sk-tooltip-History': 'Воспоминания о событиях, правителях и древних царствах.',
+                        'sk-tooltip-Investigation': 'Выводы из улик, логический поиск и скрытые детали.',
+                        'sk-tooltip-Nature': 'Знания о местности, растениях, животных и погоде.',
+                        'sk-tooltip-Religion': 'Воспоминания о божествах, символах и обрядах.',
+                        'sk-tooltip-Animal_Handling': 'Успокоение или предсказание поведения животных.',
+                        'sk-tooltip-Insight': 'Чтение настроения, намерений или правдивости человека.',
+                        'sk-tooltip-Medicine': 'Стабилизация умирающих или диагностика болезней.',
+                        'sk-tooltip-Perception': 'Замечание, слышание или ощущение в окружении.',
+                        'sk-tooltip-Survival': 'Выслеживание, навигация и предсказание погоды.',
+                        'sk-tooltip-Deception': 'Убедительная ложь или введение в заблуждение.',
+                        'sk-tooltip-Intimidation': 'Угрозы или принуждение для достижения цели.',
+                        'sk-tooltip-Performance': 'Развлечение через актерство, музыку или танец.',
+                        'sk-tooltip-Persuasion': 'Влияние на людей через дипломатию и такт.',
+                        // Panel titles
+                        'abilities-title': 'Способности',
+                        'proficiency-title': 'Владение',
+                        'progression-title': 'Прогресс',
+                        'inventory-title': 'Инвентарь',
+                        'notes-title': 'Заметки',
+                        // Progression labels
+                        'exp-label': 'Опыт:',
+                        'level-label': 'Уровень',
+                        'until-level-label': 'До уровня',
+                        'until-level-20-label': 'До уровня',
+                        'changes-title': 'Изменения',
+                        // Buttons
+                        'add-proficiency-btn': 'Добавить владение',
+                        'add-exp-change-btn': 'Новый опыт',
+                        'add-note-btn': 'Новая заметка',
+                        'effects-add-btn': 'Добавить эффект',
+                        // Right panel
+                        'qn-field': 'Для статусов и важных вещей',
+                        'inv-content': 'Предметы здесь... Очень интуитивно понятно.',
+                        // HP
+                        'hp-label': 'Здоровье',
+                        'mastery-label': 'Мастерство',
+                        'armor-class-label': 'Класс доспеха:',
+                        'speed-label': 'Скорость:',
+                        // Name
+                        'name-label': 'Имя:',
+                        'base-value-label': 'база:',
+                        'base-value-label-2': 'база:',
+                        'base-value-label-3': 'База',
+                        // Effects
+                        'effects-title': 'Эффекты',
+                    }
+                };
+
+                function applyLanguage(lang) {
+                    currentLang = lang;
+                    const t = translations[lang];
+
+                    // Update all elements with data-i18n attribute or by ID
+                    for (const [key, value] of Object.entries(t)) {
+                        const el = document.getElementById(key);
+                        if (el) {
+                            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                                el.placeholder = value;
+                            } else {
+                                el.textContent = value;
+                            }
+                        }
+                    }
+
+                    // Update active state
+                    langEn.classList.toggle('active', lang === 'en');
+                    langRu.classList.toggle('active', lang === 'ru');
+                }
+
+                langEn.addEventListener('click', function() {
+                    if (currentLang !== 'en') applyLanguage('en');
+                });
+
+                langRu.addEventListener('click', function() {
+                    if (currentLang !== 'ru') applyLanguage('ru');
+                });
+
+                // Initial language
+                applyLanguage('en');
+
+            })();
+        </script>
+
+        <!-- ========== SCRIPT 2: placeholder functions for File & Tool ========== -->
+        <script>
+            (function() {
+                function handleFileNew() {
+                    console.log('[File] New — placeholder');
+                    alert('File → New (placeholder)');
+                }
+                function handleFileOpen() {
+                    console.log('[File] Open — placeholder');
+                    alert('File → Open (placeholder)');
+                }
+                function handleFileExport() {
+                    console.log('[File] Export — placeholder');
+                    alert('File → Export (placeholder)');
+                }
+                function handleToolMore() {
+                    console.log('[Tool] More in the future — placeholder');
+                    alert('Tool → More in the future (placeholder)');
+                }
+
+                document.querySelectorAll('.dropdown-content a').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        const action = this.getAttribute('data-action');
+                        const parentDropdown = this.closest('.dropdown');
+                        if (!parentDropdown) return;
+
+                        const dropdownId = parentDropdown.id;
+                        let handler = null;
+
+                        if (dropdownId === 'dropdown-file') {
+                            if (action === 'new') handler = handleFileNew;
+                            else if (action === 'open') handler = handleFileOpen;
+                            else if (action === 'export') handler = handleFileExport;
+                        }
+                        else if (dropdownId === 'dropdown-tool') {
+                            if (action === 'more') handler = handleToolMore;
+                        }
+                        else if (dropdownId === 'dropdown-instructions-parts') {
+                            console.log(`[Instructions and parts] ${action} — UI only`);
+                        }
+
+                        if (handler) {
+                            handler();
+                        }
+                    });
+                });
+
+                console.log('Placeholder functions ready for File & Tool.');
+            })();
+        </script>
+
+        <!-- ========== MERGED SCRIPT 3+4+5+10: Dynamic list logic ========== -->
+        <script>
+            // =============================================================
+            // SCRIPT 3: Exp change list interactive logic
+            // =============================================================
+            const expChangesList = document.getElementById('exp-changes-list');
+            const addExpEntryBtn = document.getElementById('add-exp-change-btn');
+
+            function createExpChangeItem(sourceValue, valueValue) {
+                const item = document.createElement('div');
+                item.className = 'exp-change-item';
+
+                const sourceInput = document.createElement('input');
+                sourceInput.type = 'text';
+                sourceInput.className = 'exp-change-source';
+                sourceInput.placeholder = 'Source';
+                if (sourceValue) sourceInput.value = sourceValue;
+
+                const valueInput = document.createElement('input');
+                valueInput.type = 'text';
+                valueInput.className = 'change-value';
+                valueInput.placeholder = 'Value';
+                if (valueValue) valueInput.value = valueValue;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'change-remove-btn';
+                removeBtn.textContent = '✕';
+                removeBtn.title = 'Remove this change';
+                removeBtn.addEventListener('click', function() {
+                    item.remove();
+                });
+
+                item.appendChild(sourceInput);
+                item.appendChild(valueInput);
+                item.appendChild(removeBtn);
+
+                return item;
+            }
+
+            function addExpChangeItem(sourceValue, valueValue) {
+                const item = createExpChangeItem(sourceValue, valueValue);
+                expChangesList.appendChild(item);
+            }
+
+            if (addExpEntryBtn) {
+                addExpEntryBtn.addEventListener('click', function() {
+                    addExpChangeItem('', '');
+                });
+            }
+
+            // =============================================================
+            // SCRIPT 4: Proficiency list interactive logic
+            // =============================================================
+            const proficiencyList = document.getElementById('proficiency-list');
+            const addProfBtn = document.getElementById('add-proficiency-btn');
+
+            function createProficiencyItem(sourceValue, selectedSkill) {
+                const item = document.createElement('div');
+                item.className = 'proficiency-item';
+
+                const sourceInput = document.createElement('input');
+                sourceInput.type = 'text';
+                sourceInput.className = 'proficiency-source';
+                sourceInput.placeholder = 'Source';
+                if (sourceValue) sourceInput.value = sourceValue;
+
+                const select = document.createElement('select');
+                select.className = 'proficiency-select';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select skill...';
+                select.appendChild(defaultOption);
+
+                skillNames.forEach(function(skill) {
+                    const option = document.createElement('option');
+                    option.value = skill;
+                    option.textContent = skill;
+                    if (skill === selectedSkill) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'proficiency-remove-btn';
+                removeBtn.textContent = '✕';
+                removeBtn.title = 'Remove this proficiency';
+                removeBtn.addEventListener('click', function() {
+                    item.remove();
+                });
+
+                item.appendChild(sourceInput);
+                item.appendChild(select);
+                item.appendChild(removeBtn);
+
+                return item;
+            }
+
+            function addProficiencyItem(sourceValue, selectedSkill) {
+                const item = createProficiencyItem(sourceValue || '', selectedSkill || '');
+                proficiencyList.appendChild(item);
+            }
+
+            if (addProfBtn) {
+                addProfBtn.addEventListener('click', function() {
+                    addProficiencyItem('', '');
+                });
+            }
+
+            // =============================================================
+            // SCRIPT 5: Notes list interactive logic
+            // =============================================================
+            const notesContainer = document.getElementById('notes-container');
+            const addNotBtn = document.getElementById('add-note-btn');
+
+            function createNoteElement(titleValue, bodyValue) {
+                const note = document.createElement('div');
+                note.className = 'note-item';
+
+                const header = document.createElement('div');
+                header.className = 'note-header';
+
+                const titleInput = document.createElement('input');
+                titleInput.type = 'text';
+                titleInput.className = 'note-title-input';
+                titleInput.placeholder = 'Title';
+                if (titleValue) titleInput.value = titleValue;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'note-remove-btn';
+                removeBtn.textContent = '✕';
+                removeBtn.title = 'Remove this note';
+                removeBtn.addEventListener('click', function() {
+                    note.remove();
+                });
+
+                header.appendChild(titleInput);
+                header.appendChild(removeBtn);
+
+                const bodyTextarea = document.createElement('textarea');
+                bodyTextarea.className = 'note-body-textarea';
+                bodyTextarea.placeholder = 'Note here...';
+                if (bodyValue) bodyTextarea.value = bodyValue;
+
+                note.appendChild(header);
+                note.appendChild(bodyTextarea);
+
+                return note;
+            }
+
+            function addNote(titleValue, bodyValue) {
+                const note = createNoteElement(titleValue || '', bodyValue || '');
+                notesContainer.appendChild(note);
+            }
+
+            if (addNotBtn) {
+                addNotBtn.addEventListener('click', function() {
+                    addNote('', '');
+                });
+            }
+
+            // =============================================================
+            // SCRIPT 10: Effects list interactive logic
+            // =============================================================
+            const statEffectsList = document.getElementById('statEffects-list');
+            const statEffectsAddBtn = document.getElementById('effects-add-btn');
+
+            function createStatEffectItem(sourceValue, selectedStat, valueValue) {
+                const item = document.createElement('div');
+                item.className = 'stat-effects-item';
+
+                const sourceInput = document.createElement('input');
+                sourceInput.type = 'text';
+                sourceInput.className = 'stat-effects-source';
+                sourceInput.placeholder = 'Source';
+                if (sourceValue) sourceInput.value = sourceValue;
+
+                const select = document.createElement('select');
+                select.className = 'stat-effects-select';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select stat...';
+                select.appendChild(defaultOption);
+
+                StatNames.forEach(function(stat) {
+                    const option = document.createElement('option');
+                    option.value = stat;
+                    option.textContent = stat;
+                    if (stat === selectedStat) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                const valueInput = document.createElement('input');
+                valueInput.type = 'text';
+                valueInput.className = 'stat-effects-value';
+                valueInput.placeholder = 'Value';
+                if (valueValue) valueInput.value = valueValue;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'stat-effects-remove-btn';
+                removeBtn.textContent = '✕';
+                removeBtn.title = 'Remove this effect';
+                removeBtn.addEventListener('click', function() {
+                    item.remove();
+                });
+
+                item.appendChild(sourceInput);
+                item.appendChild(select);
+                item.appendChild(valueInput);
+                item.appendChild(removeBtn);
+
+                return item;
+            }
+
+            function addStatEffectItem(sourceValue, selectedStat, valueValue) {
+                const item = createStatEffectItem(sourceValue || '', selectedStat || '', valueValue || '');
+                statEffectsList.appendChild(item);
+            }
+
+            if (statEffectsAddBtn) {
+                statEffectsAddBtn.addEventListener('click', function() {
+                    addStatEffectItem('', '', '');
+                });
+            }
+
+            console.log('All dynamic lists initialized.');
+        </script>
+
+        <!-- ========== SCRIPT 6: Constants ========== -->
+        <script>
+            // Static data holding section.
+            const StatNames = [
+                "Str",
+                "Dex",
+                "Con",
+                "Int",
+                "Wis",
+                "Cha"
+            ]
+
+            const ExpLevelTable = [
+                -Infinity,
+                0,
+                300,
+                900,
+                2700,
+                6500,
+                14000,
+                23000,
+                34000,
+                48000,
+                64000,
+                85000,
+                100000,
+                120000,
+                140000,
+                165000,
+                195000,
+                225000,
+                265000,
+                305000,
+                355000,
+                Infinity
+            ]
+
+            // List of all skill names from the Abilities panel
+            const skillNames = [
+                'Athletics',
+                'Acrobatics',
+                'Sleight of Hand',
+                'Stealth',
+                'Arcana',
+                'History',
+                'Investigation',
+                'Nature',
+                'Religion',
+                'Animal Handling',
+                'Insight',
+                'Medicine',
+                'Perception',
+                'Survival',
+                'Deception',
+                'Intimidation',
+                'Performance',
+                'Persuasion'
+            ];
+
+            const SkillToStatMapper = {
+                'Athletics': 'Str',
+                'Acrobatics': 'Dex',
+                'Sleight of Hand': 'Dex',
+                'Stealth': 'Dex',
+                'Arcana': 'Int',
+                'History': 'Int',
+                'Investigation': 'Int',
+                'Nature': 'Int',
+                'Religion': 'Int',
+                'Animal Handling': 'Wis',
+                'Insight': 'Wis',
+                'Medicine': 'Wis',
+                'Perception': 'Wis',
+                'Survival': 'Wis',
+                'Deception': 'Cha',
+                'Intimidation': 'Cha',
+                'Performance': 'Cha',
+                'Persuasion': 'Cha'
+            }
+            
+            /////////////
+        </script>
+
+        <!-- ========== SCRIPT 7: External script  DO NOT TOUCH========== -->
+        <script src="back_sync.js"></script>
+
+        <!-- ========== SCRIPT 9: Py3 Console logic external script DO NOT TOUCH ========== -->
+        <script src="py_console.js"></script>
+
+        <!-- ========== SCRIPT 11: Precalculation list interactive logic ========== -->
+        <script>
+                const calcList = document.getElementById('rp-calc-list');
+                const addCalcBtn = document.getElementById('rp-calc-add-btn');
+
+                // Create a calculation item element
+                function createCalcItem(titleValue, evalValue, descValue) {
+                    const item = document.createElement('div');
+                    item.className = 'rp-calc-item';
+
+                    // Line 1: Title + Delete button
+                    const row1 = document.createElement('div');
+                    row1.className = 'calc-row';
+
+                    const titleInput = document.createElement('input');
+                    titleInput.type = 'text';
+                    titleInput.className = 'calc-input';
+                    titleInput.placeholder = 'Title:';
+                    if (titleValue) titleInput.value = titleValue;
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'calc-btn calc-btn-delete';
+                    deleteBtn.textContent = '✕';
+                    deleteBtn.title = 'Delete this calculation';
+                    deleteBtn.addEventListener('click', function() {
+                        item.remove();
+                    });
+
+                    row1.appendChild(titleInput);
+                    row1.appendChild(deleteBtn);
+
+                    // Line 2: Eval string + Send button
+                    const row2 = document.createElement('div');
+                    row2.className = 'calc-row';
+
+                    const evalInput = document.createElement('input');
+                    evalInput.type = 'text';
+                    evalInput.className = 'calc-input';
+                    evalInput.placeholder = 'Eval string:';
+                    if (evalValue) evalInput.value = evalValue;
+
+                    const sendBtn = document.createElement('button');
+                    sendBtn.className = 'calc-btn calc-btn-send';
+                    sendBtn.textContent = 'Send';
+                    sendBtn.style.fontWeight = '700';
+                    sendBtn.addEventListener('click', function() {
+                        var init_txt = sendBtn.innerText;
+                        postMsgPayload("/eval", {"pvl": evalInput.value}).then(respone => {
+                            respone.json().then(obj => {
+                                if (obj.code == 0) sendBtn.innerText = obj.body;
+                            })
+                        }).finally(fnl => {
+                            if (init_txt === sendBtn.innerText) sendBtn.innerText = "Error";
+                        });
+                    });
+
+                    row2.appendChild(evalInput);
+                    row2.appendChild(sendBtn);
+
+                    // Line 3: Description (hidden until hover)
+                    const descTextarea = document.createElement('textarea');
+                    descTextarea.className = 'calc-description';
+                    descTextarea.placeholder = 'Description(Optional)';
+                    if (descValue) descTextarea.value = descValue;
+
+                    item.appendChild(row1);
+                    item.appendChild(row2);
+                    item.appendChild(descTextarea);
+
+                    return item;
+                }
+
+                // Add a new calculation item
+                function addCalcItem(titleValue, evalValue, descValue) {
+                    const item = createCalcItem(titleValue || '', evalValue || '', descValue || '');
+                    calcList.appendChild(item);
+                }
+
+                // Add button click handler
+                if (addCalcBtn) {
+                    addCalcBtn.addEventListener('click', function() {
+                        addCalcItem('', '', '');
+                    });
+                }
+        </script>
+
+    </body>
+</html>
