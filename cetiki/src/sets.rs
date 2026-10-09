@@ -3,6 +3,7 @@ use std::{collections::BTreeSet, ops::{Add, Mul, Sub}, process::exit};
 use crate::sets::DiscreteObject::Literal;
 
 
+#[derive(Clone, Copy)]
 pub enum DiscreteObject {
     Literal(usize)
 }
@@ -20,6 +21,14 @@ pub struct DiscreteSet {
 impl DiscreteSet {
     pub fn new(sectors: usize) -> DiscreteSet {
         DiscreteSet { ite: Vec::from_iter(std::iter::repeat(0).take(sectors)), ate: BTreeSet::new() }
+    }
+
+    pub fn from(sectors: usize, vec: Vec<DiscreteObject>) -> DiscreteSet {
+        let mut set = DiscreteSet::new(sectors);
+        vec.iter().for_each(|x| { 
+            set.put(x.clone()); 
+        });
+        return set;
     }
 
     pub fn size(&self) -> usize {
@@ -138,7 +147,7 @@ impl Mul for DiscreteSet {
     type Output = DiscreteSet;
 
     ///
-    /// O(m+k)
+    /// O(max(m,k))
     /// 
     fn mul(mut self, rhs: Self) -> Self::Output {
         let sat = self.ate.clone();
@@ -156,6 +165,9 @@ impl Mul for DiscreteSet {
     }
 }
 
+///
+/// O(min(n, k))
+/// 
 impl Sub for DiscreteSet {
     type Output = DiscreteSet;
 

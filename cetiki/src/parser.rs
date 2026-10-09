@@ -55,7 +55,20 @@ impl Parser {
                     self.vars.insert(x.to_string(), (*s).to_string());
                 });
             },
-            Sections::PROG => ()
+            Sections::PROG => {
+                let mut line = line.replace(" ", "");
+                
+                self.vars.iter().for_each(|x| {
+                    let p = format!("${}", x.0);
+                    line = line.replace(&p, x.1);
+
+                });
+
+                println!("{}", line);
+
+                
+
+            }
         };
     }
 }

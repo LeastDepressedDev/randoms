@@ -6,13 +6,9 @@ mod sets;
 mod parser;
 
 fn test() {
-    let mut A = DiscreteSet::new(1024);
-    let mut B = DiscreteSet::new(1024);
-    let mut C = DiscreteSet::new(1024);
-
-    A.put(Literal(63)); A.put(Literal(23)); A.put(Literal(656));
-    B.put(Literal(64)); B.put(Literal(1)); B.put(Literal(2));
-    C.put(Literal(9)); C.put(Literal(5)); C.put(Literal(7));
+    let mut A = DiscreteSet::from(1024, vec![Literal(64), Literal(32), Literal(656)]);
+    let mut B = DiscreteSet::from(1024, vec![Literal(64), Literal(1), Literal(2)]);
+    let mut C = DiscreteSet::from(1024, vec![Literal(9), Literal(5), Literal(7)]);
 
     
 
@@ -38,5 +34,5 @@ fn run() {
 }
 
 fn main() {
-    run();
+    test();
 }
