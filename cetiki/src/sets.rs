@@ -1,81 +1,177 @@
-use std::{collections::LinkedList, fmt::Display};
+use std::{collections::BTreeSet, ops::{Add, Mul, Sub}, process::exit};
 
-use crate::{containers::{Container, F64Container, I64Container}, sets::DiscreteObject::{Integer, NonInteger}};
+use crate::sets::DiscreteObject::Literal;
 
 
-
-#[derive(Clone, Copy)]
 pub enum DiscreteObject {
-    Integer(i64),
-    NonInteger(f64)
+    Literal(usize)
 }
 
-impl Display for DiscreteObject {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Integer(v) => f.write_str(format!("Integer ( {} )", v).as_str()),
-            NonInteger(v) => f.write_str(format!("NonInteger ( {} )", v).as_str())
-        };
-        return Ok(());
-    }
-}
-
+type IteType = usize;
+#[derive(Clone)]
 pub struct DiscreteSet {
-    c_i64: Option<I64Container>,
-    c_f64: Option<F64Container>
+    ite: Vec<usize>,
+    ate: BTreeSet<usize>
 }
 
-impl Container<DiscreteObject> for DiscreteSet {
-    fn put(&mut self, element: DiscreteObject) {
-        match element {
-            Integer(val) => {
-                let container = self.c_i64.as_mut();
-                match container {
-                    Some(cont) => cont.put(val),
-                    None => {
-                        self.c_i64 = Some(I64Container::new(val));
-                    }
-                }
-            },
-            NonInteger(val) => {
-                let container = self.c_f64.as_mut();
-                match container {
-                    Some(cont) => cont.put(val),
-                    None => {
-                        self.c_f64 = Some(F64Container::new(val));
-                    }
-                }
-            }
-            _ => ()   
-        }
-    }
-
-    fn has(&self, element: DiscreteObject) -> bool {
-        match element {
-            
-            Integer(val) => self.c_i64.as_ref().is_some_and(|x| x.has(val)),
-            NonInteger(val) => self.c_f64.as_ref().is_some_and(|x| x.has(val)),
-            _ => false
-
-        }
-    }
-}
-
+///
+/// Copy: O(n)
+/// 
 impl DiscreteSet {
-    pub fn new() -> DiscreteSet {
-        return DiscreteSet { c_i64: None, c_f64: None };
+    pub fn new(sectors: usize) -> DiscreteSet {
+        DiscreteSet { ite: Vec::from_iter(std::iter::repeat(0).take(sectors)), ate: BTreeSet::new() }
     }
 
     pub fn size(&self) -> usize {
-        self.c_i64.as_ref().map_or(0, |x| x.size())
-        +
-        self.c_f64.as_ref().map_or(0, |x| x.size())
+        let mut sum = 0usize;
+        for i in 0..self.sector_capacity() {
+            let sc = DiscreteSet::sec_and_slot(i);
+            if self.ite[sc.0] & sc.1 != 0 {sum+=1;}
+        }
+        return sum;
     }
 
-    pub fn peek(&self) -> LinkedList<DiscreteObject> {
-        let mut ll = LinkedList::new();
-        // TODO: We are here
-        return ll;
+    pub fn active_sectors(&self) -> usize {
+        self.ate.len()
+    }
+
+    pub fn sectors(&self) -> usize {
+        self.ite.len()
+    }
+
+    pub fn single_sector() -> usize {
+        size_of::<IteType>()*8
+    }
+
+    pub fn sector_capacity(&self) -> usize {
+        self.sectors()*DiscreteSet::single_sector()
+    }
+
+    fn check_lit_c(&self, lit: usize) {
+        if lit >= self.sector_capacity() {
+            println!("Literal: {} over sectors capacity [0; {})", lit, self.sector_capacity());
+            exit(1);
+        }
+    }
+
+    fn sec_and_slot(lit: usize) -> (usize, usize) {
+        return (lit/DiscreteSet::single_sector(), 1 << (lit % DiscreteSet::single_sector()));
+    }
+
+    pub fn put(&mut self, element: DiscreteObject) {
+        match element {
+            Literal(lit) => {
+                self.check_lit_c(lit);
+                let sc = DiscreteSet::sec_and_slot(lit);
+
+                self.ite[sc.0] |= sc.1;
+                self.ate.insert(sc.0);
+            }
+        }
+    }
+
+    pub fn rm(&mut self, element: DiscreteObject) {
+        match element {
+            Literal(lit) => {
+                self.check_lit_c(lit);
+                let sc = DiscreteSet::sec_and_slot(lit);
+
+                self.ite[sc.0] &= !sc.1;
+                if self.ite[sc.0]==0 {
+                    self.ate.remove(&sc.0);
+                }
+            }
+        }
+    }
+
+    pub fn has(&self, element: DiscreteObject) -> bool {
+        match element {
+            Literal(lit) => {
+                self.check_lit_c(lit);
+                let sc = DiscreteSet::sec_and_slot(lit);
+
+                (self.ite[sc.0] & sc.1) != 0
+            }
+        }
     }
 }
 
+impl PartialEq for DiscreteSet {
+    fn eq(&self, other: &Self) -> bool {
+        self.active_sectors() == other.active_sectors() && self.sectors() == other.sectors() &&
+            self.ite==other.ite
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        !self.eq(other)
+    }
+}
+
+impl Eq for DiscreteSet {}
+
+impl Add for DiscreteSet {
+    type Output = DiscreteSet;
+
+    ///
+    /// O(min(n, k))
+    /// 
+    fn add(mut self, mut rhs: Self) -> Self::Output {
+        if self.active_sectors() >= rhs.active_sectors() {
+            rhs.ate.iter().for_each(|x| {
+                let sec = *x;
+                self.ite[sec] |= rhs.ite[sec];
+                self.ate.insert(sec); // const log
+            });
+            return self;
+        } else {
+            self.ate.iter().for_each(|x| {
+                let sec = rhs.ite[*x];
+                rhs.ite[sec] |= self.ite[sec];
+                rhs.ate.insert(sec); // const log
+            });
+            return rhs;
+        }
+    }
+}
+
+impl Mul for DiscreteSet {
+    type Output = DiscreteSet;
+
+    ///
+    /// O(m+k)
+    /// 
+    fn mul(mut self, rhs: Self) -> Self::Output {
+        let sat = self.ate.clone();
+        let secx = sat.union(&rhs.ate);
+
+        secx.for_each(|x| {
+            let x = *x;
+            self.ite[x] &= rhs.ite[x];
+            if self.ite[x]==0 {
+                self.ate.remove(&x);
+            }
+        });
+
+        return self;
+    }
+}
+
+impl Sub for DiscreteSet {
+    type Output = DiscreteSet;
+
+    fn sub(mut self, rhs: Self) -> Self::Output {
+        
+        let sat = self.ate.clone();
+        let secx = sat.intersection(&rhs.ate);
+
+        secx.for_each(|x| {
+            let x = *x;
+            self.ite[x] &= !rhs.ite[x];
+            if self.ite[x]==0 {
+                self.ate.remove(&x);
+            }
+        });
+
+        return self;
+    }
+}

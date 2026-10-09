@@ -1,16 +1,17 @@
-use crate::{containers::{BinContainer, Container}, sets::{DiscreteObject::Integer, DiscreteSet}};
+use crate::sets::{DiscreteObject::Literal, DiscreteSet};
 
 mod sets;
-mod containers;
 
 fn main() {
+    let mut A = DiscreteSet::new(1024);
+    let mut B = DiscreteSet::new(1024);
+    let mut C = DiscreteSet::new(1024);
 
-    let vec_i: Vec<i64> = vec![5, 1, 5, 7, 4, 9];
-    let vec_f: Vec<f64> = vec![5., 1., 5., 7., 4., 9.];
-    let mut dset = DiscreteSet::new();
+    A.put(Literal(63)); A.put(Literal(23)); A.put(Literal(656));
+    B.put(Literal(64)); B.put(Literal(1)); B.put(Literal(2));
+    C.put(Literal(9)); C.put(Literal(5)); C.put(Literal(7));
 
-    vec_i.iter().for_each(|x| dset.put(Integer(*x)));
-    vec_f.iter().for_each(|x| dset.put(Integer(x.clone() as i64)));
+    
 
-    println!("{}", dset.size());
+    println!("{}", A.clone()+(B.clone()+C.clone())==(A.clone()+B.clone())+C.clone());
 }
